@@ -27,11 +27,7 @@
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
       <div class="logo-icon">
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="white" stroke-width="2" stroke-linejoin="round" />
-          <path d="M2 17L12 22L22 17" stroke="white" stroke-width="2" stroke-linejoin="round" />
-          <path d="M2 12L12 17L22 12" stroke="white" stroke-width="2" stroke-linejoin="round" />
-        </svg>
+        <img src="image/envision.png" alt="Envision Beyond Logo" />
       </div>
       <span class="logo-text">WorkTrack </span>
       <button class="hamburger" id="hamburgerBtn" aria-label="Toggle Sidebar">
@@ -45,13 +41,11 @@
             <span class="nav-icon"><span class="material-icons"
                 style="font-size: 20px; color: white;">assignment</span></span>
             <span class="nav-label">Company Records</span>
+            <span class="nav-badge" id="badge-company-records">0</span>
             <svg class="nav-arrow" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
           <ul class="nav-submenu" id="sub-company-records">
-            <li><a href="#" class="sub-link" data-section="company-records" data-filter="all"><span class="material-icons sub-icon">list_alt</span>All Records</a></li>
-            <li><a href="#" class="sub-link" data-section="company-records" data-filter="completed"><span class="material-icons sub-icon">check_circle</span>Completed</a></li>
-            <li><a href="#" class="sub-link" data-section="company-records" data-filter="progress"><span class="material-icons sub-icon">pending</span>In Progress</a></li>
-            <li><a href="#" class="sub-link" data-section="company-records" data-filter="pending"><span class="material-icons sub-icon">cancel</span>Pending</a></li>
+            <li><a href="#" class="sub-link" data-section="company-records" data-filter="all"><span class="material-icons sub-icon">history</span>Company Record</a></li>
           </ul>
         </li>
       </ul>
@@ -181,12 +175,14 @@
             <p class="detail-role" id="detailRole"></p>
             <div class="detail-tags" id="detailTags"></div>
           </div>
-          <div class="detail-actions" style="display:flex; gap:10px; margin-left:auto;">
+          <div class="detail-actions">
             <button class="back-btn" id="editProfileBtn"
-              style="background:rgba(124,58,237,0.1); color:#7c3aed; border-color:rgba(124,58,237,0.2); display:flex; align-items:center; gap:6px; margin-left:0;">
+              style="background:rgba(124,58,237,0.1); color:#7c3aed; border-color:rgba(124,58,237,0.2);">
               <span class="material-icons" style="font-size:16px;">edit</span> Edit Profile
             </button>
-            <button class="back-btn" id="backBtn" style="margin-left:0;">Back to Overview</button>
+            <button class="back-btn" id="backBtn">
+              <span class="material-icons" style="font-size:16px;">arrow_back</span> Back to Overview
+            </button>
           </div>
         </div>
         <div class="tab-bar" id="tabBar">
@@ -199,19 +195,44 @@
 
       <!-- Company Records Section -->
       <div class="company-records-section" id="companyRecordsSection" style="display:none">
+        <div class="detail-header">
+          <div class="detail-avatar" style="background: #ffffff; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 2px; border: 2px solid #e0d7f5; box-shadow: 0 4px 14px rgba(109,40,217,0.1);">
+            <img src="image/envision.png" alt="Envision Beyond India Pvt Ltd" style="width: 100%; height: 100%; object-fit: contain; border-radius: 50%; display: block;" />
+          </div>
+          <div class="detail-info">
+            <h1 class="detail-name">Envision Beyond India Pvt Ltd</h1>
+            <p class="detail-role">Company Central Work Portal & Team Master Records</p>
+            <div class="detail-tags">
+              <span class="tag" id="companyEmpTag">5 Team Members</span>
+              <span class="tag">Master Records</span>
+              <span class="tag">Surat, Gujarat</span>
+              <span class="tag">Active</span>
+            </div>
+          </div>
+          <div class="detail-actions">
+            <button class="back-btn" id="companyBackBtn">
+              <span class="material-icons" style="font-size:16px;">arrow_back</span> Back to Overview
+            </button>
+          </div>
+        </div>
+
+        <div class="tab-bar">
+          <button class="tab-btn active">Work Record</button>
+        </div>
+
         <div class="wr-header-bar">
           <div class="wr-meta">
             <div class="wr-meta-item">
               <span class="material-icons" style="font-size:24px; color:#7c3aed;">corporate_fare</span>
-              <div><span class="wr-meta-label">Portal</span><span class="wr-meta-val">Company Portal</span></div>
+              <div><span class="wr-meta-label">Company</span><span class="wr-meta-val">Envision Beyond India Pvt Ltd</span></div>
             </div>
             <div class="wr-meta-item">
               <span class="material-icons" style="font-size:24px; color:#7c3aed;">people</span>
-              <div><span class="wr-meta-label">Total Employees</span><span class="wr-meta-val">5 Members</span></div>
+              <div><span class="wr-meta-label">Team Lead</span><span class="wr-meta-val">Praveen Kumar</span></div>
             </div>
             <div class="wr-meta-item">
               <span class="material-icons" style="font-size:24px; color:#7c3aed;">assessment</span>
-              <div><span class="wr-meta-label">Total Work Entries</span><span class="wr-meta-val"
+              <div><span class="wr-meta-label">Total Records</span><span class="wr-meta-val"
                   id="masterEntriesCount">0 Entries</span></div>
             </div>
           </div>
@@ -221,11 +242,10 @@
               <span class="material-icons"
                 style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#a099af; font-size:18px;">search</span>
               <input type="text" id="masterSearchInput" class="wr-search-input"
-                placeholder="Search employee, project, or task...">
+                placeholder="Search tasks, features, or apps...">
             </div>
             <div class="wr-sort-box" style="margin-left: 10px;">
-              <select id="masterSortSelect" class="wr-search-input"
-                style="padding-left:14px; width:auto; cursor:pointer;">
+              <select id="masterSortSelect" class="wr-select">
                 <option value="date-desc">Date (Newest)</option>
                 <option value="date-asc">Date (Oldest)</option>
                 <option value="name-asc">Employee (A-Z)</option>
@@ -238,9 +258,11 @@
               <button class="filter-tag" data-filter="progress">In Progress</button>
               <button class="filter-tag" data-filter="pending">Pending</button>
             </div>
-            <button class="export-btn" id="masterAddBtn" style="background:#7c3aed; color:#fff; margin-left:auto;">
-              <span class="material-icons" style="font-size:16px;">add</span> Add Record
-            </button>
+            <div class="wr-export-btns">
+              <button class="export-btn pdf-btn" id="masterExportPdfBtn"><span class="material-icons" style="font-size:16px;">picture_as_pdf</span> PDF</button>
+              <button class="export-btn excel-btn" id="masterExportExcelBtn"><span class="material-icons" style="font-size:16px;">table_view</span> Excel</button>
+              <button class="export-btn" id="masterAddBtn" style="background:#7c3aed; color:#fff; border-color:#7c3aed;"><span class="material-icons" style="font-size:16px;">add</span> Add</button>
+            </div>
           </div>
         </div>
 
@@ -252,6 +274,7 @@
                 <th>Employee</th>
                 <th>Application / Module</th>
                 <th>Feature / Task</th>
+                <th>Work Done</th>
                 <th>Date</th>
                 <th>Status</th>
                 <th>Actions</th>

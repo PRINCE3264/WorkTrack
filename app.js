@@ -8,6 +8,66 @@ let members = {};
 
 // ===== DEFAULT MEMBER DATA =====
 const DEFAULT_MEMBERS = {
+  praveen: {
+    name: "Praveen Kumar",
+    role: "Team Lead",
+    isLead: true,
+    avatar: "",
+    color: "linear-gradient(135deg,#4f46e5,#7c3aed)",
+    solidColor: "#4f46e5",
+    tags: ["Team Lead", "Project Architecture", "Sprint Planning", "Code Review", "DevOps", "Full Stack", "Client Delivery"],
+    tasks: 12,
+    company: "Envision Beyond India Pvt Ltd",
+    teamLead: "Self (Team Lead)",
+    info: { Email: "praveen@envisionbeyond.com", Phone: "+91 98765 00000", Company: "Envision Beyond India Pvt Ltd", "Team Lead": "Self (Team Lead)", Joined: "15 January 2025", Location: "Surat, Gujarat", Status: "Active" },
+    skills: [
+      { name: "Project Architecture & System Design", pct: 95 },
+      { name: "Sprint & Team Management", pct: 94 },
+      { name: "Code Review & Quality Assurance", pct: 92 },
+      { name: "Full Stack (.NET & React)", pct: 90 },
+      { name: "DevOps, CI/CD & Cloud Infrastructure", pct: 88 },
+      { name: "Database Architecture (PostgreSQL/SQL)", pct: 86 }
+    ],
+    responsibilities: [
+      { icon: "👥", title: "Team Management", desc: "Team members ko tasks assign karna aur daily coordination maintain karna." },
+      { icon: "📋", title: "Task Planning", desc: "Daily aur weekly work plan banana aur sprint milestones define karna." },
+      { icon: "🔍", title: "Code/Work Review", desc: "Developers ka code aur work quality review karna and standards ensure karna." },
+      { icon: "🐛", title: "Issue Resolution", desc: "Technical problems aur blockers ko identify aur solve karwana." },
+      { icon: "📊", title: "Progress Tracking", desc: "Project ka live status monitor karna aur timeline tracking karna." },
+      { icon: "⏰", title: "Deadline Management", desc: "Tasks ko deadline ke according deliver aur complete karwana." },
+      { icon: "🤝", title: "Team Support", desc: "Team members ko continuous technical guidance aur mentorship dena." },
+      { icon: "💬", title: "Communication", desc: "Manager/PM aur development team ke beech transparent coordination rakhna." },
+      { icon: "🧪", title: "Quality Check", desc: "Ensure karna ki har module client requirements ke according test ho." },
+      { icon: "🚀", title: "Deployment Support", desc: "Testing, release aur production deployment mein coordinate karna." },
+      { icon: "📚", title: "Knowledge Sharing", desc: "Team ko new technology, tools aur best practices sikhana." },
+      { icon: "📝", title: "Reporting", desc: "Management aur stakeholders ko project/team progress report dena." }
+    ],
+    taskList: [
+      { title: "👥 Team Management: Assign sprint modules & features across frontend and backend developers.", date: "01 Aug 2026", status: "done" },
+      { title: "📋 Task Planning: Created weekly development roadmap, sprint backlog, and task milestones.", date: "02 Aug 2026", status: "done" },
+      { title: "🔍 Code/Work Review: Conducted PR reviews for React frontend, .NET APIs, and state management.", date: "04 Aug 2026", status: "done" },
+      { title: "🐛 Issue Resolution: Resolved critical database deadlock and API integration blockers.", date: "06 Aug 2026", status: "done" },
+      { title: "📊 Progress Tracking: Monitored daily burndown chart and sprint delivery health.", date: "08 Aug 2026", status: "done" },
+      { title: "⏰ Deadline Management: Aligned module deliveries to ensure on-time client release.", date: "10 Aug 2026", status: "done" },
+      { title: "🤝 Team Support: Provided architectural guidance on Google Maps GIS layers and Territory engine.", date: "12 Aug 2026", status: "done" },
+      { title: "💬 Communication: Coordinated client change requests with product managers and dev team.", date: "14 Aug 2026", status: "done" },
+      { title: "🧪 Quality Check: Verified SonarQube quality gate and automated test coverage across modules.", date: "16 Aug 2026", status: "done" },
+      { title: "🚀 Deployment Support: Coordinated Docker containerization and Kubernetes cluster rollout.", date: "18 Aug 2026", status: "done" },
+      { title: "📚 Knowledge Sharing: Held team workshop on React 18, performance optimization, and clean code.", date: "20 Aug 2026", status: "progress" },
+      { title: "📝 Reporting: Compiled monthly project velocity and performance metrics for management.", date: "22 Aug 2026", status: "progress" }
+    ],
+    reports: { completed: 10, inProgress: 2, pending: 0 },
+    workRecords: [
+      { app: "EtaPrise", feature: "System Architecture", task: "Omni Inside System Architecture, Microservices & Database Schema Design" },
+      { app: "EtaPrise", feature: "Sprint Management", task: "Sprint Planning, Developer Task Assignment, Velocity & Milestone Tracking" },
+      { app: "EtaPrise", feature: "Code Review & QA", task: "Comprehensive Code Review & Pull Request Approval for Full-Stack Team" },
+      { app: "Fleet Management", feature: "Rule Engine Review", task: "Architected Driver Assignment Rule Engine & Route Optimization Logic" },
+      { app: "DevOps", feature: "Production Deployment", task: "Docker Containerization, K8s Cluster Management & Jenkins CI/CD Hardening" },
+      { app: "AI-Studio", feature: "Chatbot Architecture", task: "Evaluated AI Studio LLM Chatbot APIs & Knowledge Base Ingestion Pipeline" },
+      { app: "Security", feature: "SonarQube & OWASP", task: "Security Vulnerability Mitigation & Code Quality Assurance Audit" },
+      { app: "Database", feature: "PostgreSQL Tuning", task: "Database Indexing, Query Optimization & Connection Pool Tuning" }
+    ]
+  },
   prince: {
     name: "Prince",
     role: "Full Stack Developer",
@@ -18,17 +78,17 @@ const DEFAULT_MEMBERS = {
     tasks: 20,
     company: "Envision Beyond India Pvt Ltd",
     teamLead: "Praveen Kumar",
-    info: { Email: "prince@hie.com", Phone: "+91 98765 00001", Company: "Envision Beyond India Pvt Ltd", "Team Lead": "Praveen Kumar", Joined: "26 March 2026", Location: "Surat, Gujarat", Status: "Active" },
+    info: { Email: "prince@envisionbeyond.com", Phone: "+91 98765 00001", Company: "Envision Beyond India Pvt Ltd", "Team Lead": "Praveen Kumar", Joined: "26 March 2026", Location: "Surat, Gujarat", Status: "Active" },
     skills: [
-      { name:"JavaScript", pct:90 },
-      { name:"React", pct:82 },
-      { name:"CSS", pct:75 },
-      { name:"Node.js", pct:60 },
-      { name:".Net", pct:70 },
-      { name:"Angular", pct:78 },
-      { name:"Pgadmin", pct:65 },
-      { name:"Wordpress", pct:60 },
-      { name:"Devops", pct:68 }
+      { name: "JavaScript", pct: 90 },
+      { name: "React", pct: 82 },
+      { name: "CSS", pct: 75 },
+      { name: "Node.js", pct: 60 },
+      { name: ".Net", pct: 70 },
+      { name: "Angular", pct: 78 },
+      { name: "Pgadmin", pct: 65 },
+      { name: "Wordpress", pct: 60 },
+      { name: "Devops", pct: 68 }
     ],
     taskList: [
       { title: "Controlpanel: Design Summary Card Appointment, Contract, Contact, Leave", date: "01 Aug 2026", status: "done" },
@@ -52,28 +112,28 @@ const DEFAULT_MEMBERS = {
       { title: "Performance Optimization: Testing api response + security enhancement", date: "21 Aug 2026", status: "pending" },
       { title: "CI Change #1687: Ui Change Article, Footer, Header", date: "22 Aug 2026", status: "pending" }
     ],
-    reports: { completed:15, inProgress:3, pending:2 },
+    reports: { completed: 15, inProgress: 3, pending: 2 },
     workRecords: [
-      { app:"EtaPrise",           feature:"Controlpanel",              task:"Design Summary Card Appointment, Contract, Contact, Leave" },
-      { app:"EtaPrise",           feature:"Sales",                     task:"Integrated Sales module APIs with the frontend pages and implemented API data binding and functionality." },
-      { app:"EtaPrise",           feature:"Job Definition",            task:"Worked on Job Definition module UI, API integration, database design, and frontend functionality for OMNI Inside." },
-      { app:"EtaPrise(WHM)",      feature:"Account",                   task:"Integrated Account module APIs with the frontend pages and implemented API data binding and functionality." },
-      { app:"EtaPrise",           feature:"Appointment",               task:"Integrated Appointment module APIs with the frontend pages and implemented API data binding and functionality" },
-      { app:"EtaPrise",           feature:"Region & Territory",        task:"Create new component + Db Table + Backend integration" },
-      { app:"EtaPrise",           feature:"Contract",                  task:"Integrated Appointment module APIs with the frontend pages and implemented API data binding and functionality" },
-      { app:"EtaPrise",           feature:"WhatsApp Integration",      task:"Create ui in existing component + API config" },
-      { app:"EtaPrise",           feature:"iOmni Integration",         task:"Ui Designing" },
-      { app:"EtaPrise",           feature:"Elevator PM",               task:"Summary card designing & Table Create" },
-      { app:"EtaPrise",           feature:"AI Studio",                 task:"AI Studio: Worked on AI Chatbot, Knowledge Base, Appointment, Account, Contact, Notifications, API Integration, WhatsApp/SMS, chat UI, polls, events, and database" },
-      { app:"EtaPrise",           feature:"QA Testing (SonarQube)",    task:"Testing api response + security enhancement" },
-      { app:"EtaPrise",           feature:"Docker",                    task:"Create Dockerfiles + build pipeline config" },
-      { app:"DevOps",             feature:"Kubernetes",                task:"Cluster setup + deployment config" },
-      { app:"DevOps",             feature:"Nginx",                     task:"Config backend + frontend routing" },
-      { app:"DevOps",             feature:"Automation",                task:"Create backend + frontend config + database table" },
-      { app:"DevOps",             feature:"Jenkins CI/CD",             task:"Create pipeline + build/test/deploy stages" },
-      { app:"DevOps",             feature:"Enterprise Application",    task:"Create whole website application" },
-      { app:"WordPress App (EtaPrise) live", feature:"Performance Optimization", task:"Testing api response + security enhancement" },
-      { app:"WordPress App (EtaPrise) live", feature:"CI Change #1687",          task:"Ui Change Article, Footer, Header" }
+      { app: "EtaPrise", feature: "Controlpanel", task: "Design Summary Card Appointment, Contract, Contact, Leave" },
+      { app: "EtaPrise", feature: "Sales", task: "Integrated Sales module APIs with the frontend pages and implemented API data binding and functionality." },
+      { app: "EtaPrise", feature: "Job Definition", task: "Worked on Job Definition module UI, API integration, database design, and frontend functionality for OMNI Inside." },
+      { app: "EtaPrise(WHM)", feature: "Account", task: "Integrated Account module APIs with the frontend pages and implemented API data binding and functionality." },
+      { app: "EtaPrise", feature: "Appointment", task: "Integrated Appointment module APIs with the frontend pages and implemented API data binding and functionality" },
+      { app: "EtaPrise", feature: "Region & Territory", task: "Create new component + Db Table + Backend integration" },
+      { app: "EtaPrise", feature: "Contract", task: "Integrated Appointment module APIs with the frontend pages and implemented API data binding and functionality" },
+      { app: "EtaPrise", feature: "WhatsApp Integration", task: "Create ui in existing component + API config" },
+      { app: "EtaPrise", feature: "iOmni Integration", task: "Ui Designing" },
+      { app: "EtaPrise", feature: "Elevator PM", task: "Summary card designing & Table Create" },
+      { app: "EtaPrise", feature: "AI Studio", task: "AI Studio: Worked on AI Chatbot, Knowledge Base, Appointment, Account, Contact, Notifications, API Integration, WhatsApp/SMS, chat UI, polls, events, and database" },
+      { app: "EtaPrise", feature: "QA Testing (SonarQube)", task: "Testing api response + security enhancement" },
+      { app: "EtaPrise", feature: "Docker", task: "Create Dockerfiles + build pipeline config" },
+      { app: "DevOps", feature: "Kubernetes", task: "Cluster setup + deployment config" },
+      { app: "DevOps", feature: "Nginx", task: "Config backend + frontend routing" },
+      { app: "DevOps", feature: "Automation", task: "Create backend + frontend config + database table" },
+      { app: "DevOps", feature: "Jenkins CI/CD", task: "Create pipeline + build/test/deploy stages" },
+      { app: "DevOps", feature: "Enterprise Application", task: "Create whole website application" },
+      { app: "WordPress App (EtaPrise) live", feature: "Performance Optimization", task: "Testing api response + security enhancement" },
+      { app: "WordPress App (EtaPrise) live", feature: "CI Change #1687", task: "Ui Change Article, Footer, Header" }
     ]
   },
   ajay: {
@@ -85,24 +145,24 @@ const DEFAULT_MEMBERS = {
     tasks: 3,
     company: "Envision Beyond India Pvt Ltd",
     teamLead: "Praveen Kumar",
-    info: { Email: "ajay@hie.com", Phone: "+91 98765 00002", Company: "Envision Beyond India Pvt Ltd", "Team Lead": "Praveen Kumar", Joined: "26 March 2026", Location: "Surat, Gujarat", Status: "Active" },
+    info: { Email: "ajay@envisionbeyond.com", Phone: "+91 98765 00002", Company: "Envision Beyond India Pvt Ltd", "Team Lead": "Praveen Kumar", Joined: "26 March 2026", Location: "Surat, Gujarat", Status: "Active" },
     skills: [
-      { name:"JavaScript", pct:90 },
-      { name:"React", pct:82 },
-      { name:"CSS", pct:75 },
-      { name:"Node.js", pct:60 },
-      { name:".Net", pct:70 },
-      { name:"Angular", pct:78 },
-      { name:"Pgadmin", pct:65 },
-      { name:"Wordpress", pct:60 },
-      { name:"Devops", pct:68 }
+      { name: "JavaScript", pct: 90 },
+      { name: "React", pct: 82 },
+      { name: "CSS", pct: 75 },
+      { name: "Node.js", pct: 60 },
+      { name: ".Net", pct: 70 },
+      { name: "Angular", pct: 78 },
+      { name: "Pgadmin", pct: 65 },
+      { name: "Wordpress", pct: 60 },
+      { name: "Devops", pct: 68 }
     ],
     taskList: [
       { title: "Build REST API for orders module", date: "22 Aug 2026", status: "progress" },
       { title: "Optimize database queries", date: "21 Aug 2026", status: "done" },
       { title: "Deploy microservices to staging", date: "24 Aug 2026", status: "pending" }
     ],
-    reports: { completed:8, inProgress:2, pending:1 }
+    reports: { completed: 8, inProgress: 2, pending: 1 }
   },
   jigar: {
     name: "Jigar",
@@ -113,17 +173,17 @@ const DEFAULT_MEMBERS = {
     tasks: 7,
     company: "Envision Beyond India Pvt Ltd",
     teamLead: "Praveen Kumar",
-    info: { Email: "jigar@hie.com", Phone: "+91 98765 00003", Company: "Envision Beyond India Pvt Ltd", "Team Lead": "Praveen Kumar", Joined: "26 March 2026", Location: "Surat, Gujarat", Status: "Active" },
+    info: { Email: "jigar@envisionbeyond.com", Phone: "+91 98765 00003", Company: "Envision Beyond India Pvt Ltd", "Team Lead": "Praveen Kumar", Joined: "26 March 2026", Location: "Surat, Gujarat", Status: "Active" },
     skills: [
-      { name:"JavaScript", pct:90 },
-      { name:"React", pct:82 },
-      { name:"CSS", pct:75 },
-      { name:"Node.js", pct:60 },
-      { name:".Net", pct:70 },
-      { name:"Angular", pct:78 },
-      { name:"Pgadmin", pct:65 },
-      { name:"Wordpress", pct:60 },
-      { name:"Devops", pct:68 }
+      { name: "JavaScript", pct: 90 },
+      { name: "React", pct: 82 },
+      { name: "CSS", pct: 75 },
+      { name: "Node.js", pct: 60 },
+      { name: ".Net", pct: 70 },
+      { name: "Angular", pct: 78 },
+      { name: "Pgadmin", pct: 65 },
+      { name: "Wordpress", pct: 60 },
+      { name: "Devops", pct: 68 }
     ],
     taskList: [
       { title: "Accounts: New component create", date: "01 Aug 2026", status: "done" },
@@ -142,7 +202,7 @@ const DEFAULT_MEMBERS = {
       { title: "IAMOmni: New component + Create sandbox environment + Integrate omni apis sync", date: "14 Aug 2026", status: "pending" },
       { title: "Controlpanel: Appointment + Contract + PartRequest + Leaves + Accreditation + Expence", date: "15 Aug 2026", status: "done" }
     ],
-    reports: { completed:15, inProgress:4, pending:3 }
+    reports: { completed: 15, inProgress: 4, pending: 3 }
   },
   devyani: {
     name: "Devyani",
@@ -153,17 +213,17 @@ const DEFAULT_MEMBERS = {
     tasks: 2,
     company: "Envision Beyond India Pvt Ltd",
     teamLead: "Praveen Kumar",
-    info: { Email: "devyani@hie.com", Phone: "+91 98765 00004", Company: "Envision Beyond India Pvt Ltd", "Team Lead": "Praveen Kumar", Joined: "26 March 2026", Location: "Surat, Gujarat", Status: "Active" },
+    info: { Email: "devyani@envisionbeyond.com", Phone: "+91 98765 00004", Company: "Envision Beyond India Pvt Ltd", "Team Lead": "Praveen Kumar", Joined: "26 March 2026", Location: "Surat, Gujarat", Status: "Active" },
     skills: [
-      { name:"JavaScript", pct:90 },
-      { name:"React", pct:82 },
-      { name:"CSS", pct:75 },
-      { name:"Node.js", pct:60 },
-      { name:".Net", pct:70 },
-      { name:"Angular", pct:78 },
-      { name:"Pgadmin", pct:65 },
-      { name:"Wordpress", pct:60 },
-      { name:"Devops", pct:68 }
+      { name: "JavaScript", pct: 90 },
+      { name: "React", pct: 82 },
+      { name: "CSS", pct: 75 },
+      { name: "Node.js", pct: 60 },
+      { name: ".Net", pct: 70 },
+      { name: "Angular", pct: 78 },
+      { name: "Pgadmin", pct: 65 },
+      { name: "Wordpress", pct: 60 },
+      { name: "Devops", pct: 68 }
     ],
     taskList: [
       { title: "General / R&D: Conducted R&D on the Etaprise application to understand module functionality and system workflow.", date: "01 Aug 2026", status: "done" },
@@ -188,7 +248,7 @@ const DEFAULT_MEMBERS = {
       { title: "API Mapping (Cross-Module): Reviewed the APIs used across different WMS modules. Checked and analyzed API responses and data flow for each module. Verified wh", date: "20 Aug 2026", status: "progress" },
       { title: "Dashboard / Dark Theme UI: Fixed UI Issues related to the dark theme. Updated the application logo and made the required dashboard changes; removed unnecessary", date: "21 Aug 2026", status: "pending" }
     ],
-    reports: { completed:20, inProgress:1, pending:1 }
+    reports: { completed: 20, inProgress: 1, pending: 1 }
   },
   tanisha: {
     name: "Tanisha",
@@ -201,15 +261,15 @@ const DEFAULT_MEMBERS = {
     teamLead: "Praveen Kumar",
     info: { Email: "tanisha@hie.com", Phone: "+91 98765 00005", Company: "Envision Beyond India Pvt Ltd", "Team Lead": "Praveen Kumar", Joined: "26 March 2026", Location: "Surat, Gujarat", Status: "Active" },
     skills: [
-      { name:"JavaScript", pct:90 },
-      { name:"React", pct:82 },
-      { name:"CSS", pct:75 },
-      { name:"Node.js", pct:60 },
-      { name:".Net", pct:70 },
-      { name:"Angular", pct:78 },
-      { name:"Pgadmin", pct:65 },
-      { name:"Wordpress", pct:60 },
-      { name:"Devops", pct:68 }
+      { name: "JavaScript", pct: 90 },
+      { name: "React", pct: 82 },
+      { name: "CSS", pct: 75 },
+      { name: "Node.js", pct: 60 },
+      { name: ".Net", pct: 70 },
+      { name: "Angular", pct: 78 },
+      { name: "Pgadmin", pct: 65 },
+      { name: "Wordpress", pct: 60 },
+      { name: "Devops", pct: 68 }
     ],
     taskList: [
       { title: "Google Maps Integration: Integrated Google Maps into the Region Territory module to provide an interactive map for managing and viewing geographical territories.", date: "01 Aug 2026", status: "done" },
@@ -252,7 +312,7 @@ const DEFAULT_MEMBERS = {
       { title: "Bug Fixing & Improvements: Continuously identified and fixed UI, functional, API, database, routing, integration, and PDF-related issues across different modules.", date: "07 Sep 2026", status: "pending" },
       { title: "Legacy Code Integration: Integrated new features into existing project code while ensuring existing functionality and default behavior were preserved.", date: "08 Sep 2026", status: "pending" }
     ],
-    reports: { completed:18, inProgress:2, pending:2 }
+    reports: { completed: 18, inProgress: 2, pending: 2 }
   }
 };
 
@@ -293,34 +353,48 @@ function init() {
 // ===== MEMBERS GRID =====
 function renderMembersGrid() {
   membersGrid.innerHTML = "";
-  
+
+  const memberCount = Object.keys(members).length;
   const totalMembersSpan = document.getElementById("overviewTotalMembers");
   if (totalMembersSpan) {
-    totalMembersSpan.textContent = Object.keys(members).length;
+    totalMembersSpan.textContent = memberCount;
   }
-  
+
   const countBadge = document.getElementById("membersCountBadge");
   if (countBadge) {
-    countBadge.textContent = `${Object.keys(members).length} Active`;
+    countBadge.textContent = `${memberCount} Active`;
   }
-  
+
   const totalTasksSpan = document.getElementById("overviewTotalTasks");
   if (totalTasksSpan) {
     totalTasksSpan.textContent = dbRecords.length;
   }
-  
+
+  const companyTag = document.getElementById("companyEmpTag");
+  if (companyTag) {
+    companyTag.textContent = `${memberCount} Team Members`;
+  }
+
+  const companyBadge = document.getElementById("badge-company-records");
+  if (companyBadge) {
+    companyBadge.textContent = dbRecords.length;
+  }
+
   Object.entries(members).forEach(([key, m]) => {
     const card = document.createElement("div");
     card.className = "member-card";
     card.style.setProperty("--color", m.solidColor + "33");
-    const avatarHtml = m.avatar 
+    const avatarHtml = m.avatar
       ? `<div class="mc-avatar mc-avatar-img"><img src="${m.avatar}" alt="${m.name}" style="width:100%; height:100%; border-radius:50%; object-fit:cover; display:block;" /></div>`
       : `<div class="mc-avatar" style="background:${m.color}">${m.name[0]}</div>`;
+    const isLead = m.isLead || (m.role && m.role.toLowerCase().includes("lead"));
+    const leadBadge = isLead ? `<span style="background:linear-gradient(135deg,#4f46e5,#7c3aed); color:#fff; font-size:0.68rem; font-weight:700; padding:2px 8px; border-radius:12px; margin-left:6px; vertical-align:middle;">TL</span>` : '';
+    const liveTaskCount = dbRecords.filter(r => r.memberKey === key).length;
     card.innerHTML = `
       ${avatarHtml}
-      <div class="mc-name">${m.name}</div>
+      <div class="mc-name">${m.name}${leadBadge}</div>
       <div class="mc-role">${m.role}</div>
-      <div class="mc-tasks">Tasks: <span>${m.tasks}</span></div>
+      <div class="mc-tasks">Tasks: <span>${liveTaskCount}</span></div>
       <button class="mc-btn" style="--color:${m.solidColor}33">View Dashboard</button>
     `;
     card.querySelector(".mc-btn").addEventListener("click", (e) => {
@@ -341,7 +415,7 @@ function showMember(key, tab) {
   document.getElementById("companyRecordsSection").style.display = "none";
   const companyRecordsBtn = document.getElementById("companyRecordsBtn");
   if (companyRecordsBtn) companyRecordsBtn.classList.remove("active");
-  
+
   memberDetail.style.display = "block";
   memberDetail.style.animation = "none";
   requestAnimationFrame(() => { memberDetail.style.animation = ""; });
@@ -397,11 +471,31 @@ function renderTab(tab) {
   requestAnimationFrame(() => { tabContent.style.animation = ""; tabContent.className = "tab-content"; });
 
   if (tab === "profile") {
+    const responsibilitiesHtml = m.responsibilities ? `
+      <div class="info-card" style="grid-column: 1 / -1; margin-top: 6px;">
+        <h3 style="display:flex; align-items:center; gap:8px;">
+          <span class="material-icons" style="color:var(--primary); font-size:22px;">stars</span>
+          Key Responsibilities & Role Focus
+        </h3>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:12px; margin-top:14px;">
+          ${m.responsibilities.map(r => `
+            <div style="background:#faf9fd; border:1px solid #eeeaf6; border-radius:10px; padding:12px 14px; display:flex; gap:12px; align-items:flex-start; transition:transform 0.15s, box-shadow 0.15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(109,40,217,0.06)'" onmouseout="this.style.transform='none';this.style.boxShadow='none'">
+              <span style="font-size:1.4rem; line-height:1; flex-shrink:0; margin-top:2px;">${r.icon}</span>
+              <div>
+                <div style="font-weight:700; color:#1a1035; font-size:0.88rem; margin-bottom:3px;">${r.title}</div>
+                <div style="font-size:0.78rem; color:#6b5fa0; line-height:1.4;">${r.desc}</div>
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      </div>
+    ` : '';
+
     tabContent.innerHTML = `
       <div class="profile-grid">
         <div class="info-card">
           <h3>Personal Information</h3>
-          ${Object.entries(m.info).map(([k,v]) => `
+          ${Object.entries(m.info).map(([k, v]) => `
             <div class="info-row">
               <span class="info-key">${k}</span>
               <span class="info-val">${v}</span>
@@ -417,6 +511,7 @@ function renderTab(tab) {
             </div>
           `).join("")}
         </div>
+        ${responsibilitiesHtml}
       </div>
     `;
     // Animate progress bars
@@ -501,7 +596,7 @@ function renderTab(tab) {
             <input type="text" id="memberSearchInput" class="wr-search-input" placeholder="Search tasks, features, or apps...">
           </div>
           <div class="wr-sort-box" style="margin-left: 10px;">
-            <select id="memberSortSelect" class="wr-search-input" style="padding-left:14px; width:auto; cursor:pointer;">
+            <select id="memberSortSelect" class="wr-select">
               <option value="date-desc">Date (Newest)</option>
               <option value="date-asc">Date (Oldest)</option>
               <option value="app-asc">Application (A-Z)</option>
@@ -550,19 +645,19 @@ function renderTab(tab) {
     memberQuery.sort = "date-desc";
 
     // Bind member query control event listeners using jQuery
-    $("#memberSearchInput").on("keyup input", function() {
+    $("#memberSearchInput").on("keyup input", function () {
       memberQuery.search = $(this).val();
       memberQuery.page = 1;
       renderMemberRecords();
     });
 
-    $("#memberSortSelect").on("change", function() {
+    $("#memberSortSelect").on("change", function () {
       memberQuery.sort = $(this).val();
       memberQuery.page = 1;
       renderMemberRecords();
     });
 
-    $(".wr-filter-tags .filter-tag").on("click", function() {
+    $(".wr-filter-tags .filter-tag").on("click", function () {
       $(".wr-filter-tags .filter-tag").removeClass("active");
       $(this).addClass("active");
       memberQuery.status = $(this).data("filter");
@@ -570,17 +665,17 @@ function renderTab(tab) {
       renderMemberRecords();
     });
 
-    $("#exportPdfBtn").on("click", function() {
+    $("#exportPdfBtn").on("click", function () {
       const list = getFilteredMemberRecords();
       exportPDF(m, list);
     });
 
-    $("#exportExcelBtn").on("click", function() {
+    $("#exportExcelBtn").on("click", function () {
       const list = getFilteredMemberRecords();
       exportExcel(m, list);
     });
 
-    $("#memberAddBtn").on("click", function() {
+    $("#memberAddBtn").on("click", function () {
       openAddModal(currentMember);
     });
 
@@ -622,10 +717,10 @@ function setupSidebarNav() {
       const member = btn.dataset.member;
       const isExpanded = btn.getAttribute("aria-expanded") === "true";
       // Collapse all
-      document.querySelectorAll(".nav-btn").forEach(b => { b.setAttribute("aria-expanded","false"); b.classList.remove("active"); });
+      document.querySelectorAll(".nav-btn").forEach(b => { b.setAttribute("aria-expanded", "false"); b.classList.remove("active"); });
       document.querySelectorAll(".nav-submenu").forEach(s => s.classList.remove("open"));
       if (!isExpanded) {
-        btn.setAttribute("aria-expanded","true");
+        btn.setAttribute("aria-expanded", "true");
         btn.classList.add("active");
         document.getElementById(`sub-${member}`).classList.add("open");
         showMember(member, "profile");
@@ -640,29 +735,44 @@ function setupSidebarNav() {
     });
   });
 
-  // Company Records master button — toggles submenu ONLY
+  // Company Records master button — opens Company Records page and toggles submenu
   const companyRecordsBtn = document.getElementById("companyRecordsBtn");
   if (companyRecordsBtn) {
     companyRecordsBtn.addEventListener("click", () => {
       const subMenu = document.getElementById("sub-company-records");
-      const isOpen = subMenu && subMenu.classList.contains("open");
+      const isExpanded = companyRecordsBtn.getAttribute("aria-expanded") === "true";
 
       // Collapse all OTHER employee submenus (not this one)
       document.querySelectorAll(".nav-btn:not(#companyRecordsBtn)").forEach(b => {
-        b.setAttribute("aria-expanded","false");
+        b.setAttribute("aria-expanded", "false");
         b.classList.remove("active");
       });
       document.querySelectorAll(".nav-submenu:not(#sub-company-records)").forEach(s => s.classList.remove("open"));
 
-      // Toggle this submenu
-      if (isOpen) {
-        subMenu.classList.remove("open");
+      if (!isExpanded) {
+        companyRecordsBtn.setAttribute("aria-expanded", "true");
+        companyRecordsBtn.classList.add("active");
+        if (subMenu) subMenu.classList.add("open");
+
+        // Open Company Records dashboard view
+        showCompanyRecords();
+
+        // Highlight 'All Records' submenu link
+        document.querySelectorAll(".sub-link").forEach(l => l.classList.remove("active"));
+        const allLink = document.querySelector('.sub-link[data-section="company-records"][data-filter="all"]');
+        if (allLink) allLink.classList.add("active");
+      } else {
+        // Collapsed back - show welcome
+        if (subMenu) subMenu.classList.remove("open");
         companyRecordsBtn.classList.remove("active");
         companyRecordsBtn.setAttribute("aria-expanded", "false");
-      } else {
-        companyRecordsBtn.classList.add("active");
-        companyRecordsBtn.setAttribute("aria-expanded", "true");
-        if (subMenu) subMenu.classList.add("open");
+        document.querySelectorAll(".sub-link").forEach(l => l.classList.remove("active"));
+
+        currentMember = null;
+        welcomeSection.style.display = "block";
+        memberDetail.style.display = "none";
+        document.getElementById("companyRecordsSection").style.display = "none";
+        bcMember.textContent = "Overview";
       }
     });
   }
@@ -683,7 +793,7 @@ function setupSidebarNav() {
         showCompanyRecords();
         masterQuery.status = filter;
         masterQuery.page = 1;
-        renderMasterTable();
+        renderMasterRecords();
         // Sync filter tags UI
         document.querySelectorAll("#companyRecordsSection .filter-tag").forEach(t => {
           t.classList.toggle("active", t.dataset.filter === filter);
@@ -727,7 +837,7 @@ function setupBackBtn() {
     memberDetail.style.display = "none";
     welcomeSection.style.display = "block";
     bcMember.textContent = "Overview";
-    document.querySelectorAll(".nav-btn").forEach(b => { b.classList.remove("active"); b.setAttribute("aria-expanded","false"); });
+    document.querySelectorAll(".nav-btn").forEach(b => { b.classList.remove("active"); b.setAttribute("aria-expanded", "false"); });
     document.querySelectorAll(".nav-submenu").forEach(s => s.classList.remove("open"));
     document.querySelectorAll(".sub-link").forEach(l => l.classList.remove("active"));
   });
@@ -740,7 +850,7 @@ function setupHamburger() {
     sidebar.classList.toggle("collapsed", sidebarCollapsed);
     mainContent.classList.toggle("expanded", sidebarCollapsed);
   });
-  
+
   // Expand sidebar on logo icon click if collapsed
   const logoIcon = document.querySelector(".logo-icon");
   if (logoIcon) {
@@ -795,7 +905,7 @@ function exportPDF(m, wr) {
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
   doc.text(`Name: ${m.name}   |   Company: ${m.company}   |   Team Lead: ${m.teamLead}`, 14, 20);
-  doc.text(`Generated: ${new Date().toLocaleDateString("en-IN", { day:"2-digit", month:"short", year:"numeric" })}`, 250, 20, { align: "right" });
+  doc.text(`Generated: ${new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}`, 250, 20, { align: "right" });
 
   // Table
   doc.autoTable({
@@ -832,7 +942,7 @@ function exportExcel(m, wr) {
     ["Work Record Report — " + m.name],
     ["Company:", m.company],
     ["Team Lead:", m.teamLead],
-    ["Generated:", new Date().toLocaleDateString("en-IN", { day:"2-digit", month:"short", year:"numeric" })],
+    ["Generated:", new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })],
     [],
     ["#", "Application / Module", "Feature / Task", "Description"]
   ];
@@ -851,6 +961,96 @@ function exportExcel(m, wr) {
   XLSX.writeFile(wb, `${m.name}_WorkRecord.xlsx`);
 }
 
+// ===== EXPORT MASTER PDF =====
+function exportMasterPDF(wr) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+
+  // Header background
+  doc.setFillColor(109, 40, 217);
+  doc.rect(0, 0, 297, 28, "F");
+
+  // Title
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(18);
+  doc.setFont("helvetica", "bold");
+  doc.text("Company Master Work Record Report", 14, 12);
+
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  doc.text(`Company: Envision Beyond India Pvt Ltd   |   Total Records: ${wr.length} Entries`, 14, 20);
+  doc.text(`Generated: ${new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}`, 250, 20, { align: "right" });
+
+  // Table
+  doc.autoTable({
+    startY: 32,
+    head: [["#", "Employee", "Application / Module", "Feature / Task", "Work Done", "Date", "Status"]],
+    body: wr.map((r, i) => [
+      i + 1,
+      r.empName || (members[r.memberKey] ? members[r.memberKey].name : "Employee"),
+      r.app,
+      r.feature,
+      r.task,
+      r.date,
+      (r.status || "").toUpperCase()
+    ]),
+    styles: { fontSize: 8, cellPadding: 3, overflow: "linebreak" },
+    headStyles: { fillColor: [109, 40, 217], textColor: 255, fontStyle: "bold", halign: "center" },
+    columnStyles: {
+      0: { cellWidth: 10, halign: "center" },
+      1: { cellWidth: 30 },
+      2: { cellWidth: 42 },
+      3: { cellWidth: 40 },
+      4: { cellWidth: 95 },
+      5: { cellWidth: 26, halign: "center" },
+      6: { cellWidth: 26, halign: "center" }
+    },
+    alternateRowStyles: { fillColor: [244, 243, 251] },
+    rowStyles: { valign: "middle" },
+    margin: { left: 14, right: 14 },
+    didDrawPage: (data) => {
+      doc.setFontSize(8);
+      doc.setTextColor(150);
+      doc.text(`Page ${doc.internal.getNumberOfPages()}  |  Envision Beyond India Pvt Ltd`, 148, 205, { align: "center" });
+    }
+  });
+
+  doc.save(`Company_Master_WorkRecords.pdf`);
+}
+
+// ===== EXPORT MASTER EXCEL =====
+function exportMasterExcel(wr) {
+  const wb = XLSX.utils.book_new();
+
+  // Header rows
+  const headerRows = [
+    ["Company Master Work Record Report — Envision Beyond India Pvt Ltd"],
+    ["Company:", "Envision Beyond India Pvt Ltd"],
+    ["Total Entries:", wr.length],
+    ["Generated:", new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })],
+    [],
+    ["#", "Employee", "Application / Module", "Feature / Task", "Work Done", "Date", "Status"]
+  ];
+  const dataRows = wr.map((r, i) => [
+    i + 1,
+    r.empName || (members[r.memberKey] ? members[r.memberKey].name : "Employee"),
+    r.app,
+    r.feature,
+    r.task,
+    r.date,
+    r.status
+  ]);
+  const allRows = [...headerRows, ...dataRows];
+
+  const ws = XLSX.utils.aoa_to_sheet(allRows);
+
+  ws["!cols"] = [{ wch: 5 }, { wch: 20 }, { wch: 30 }, { wch: 30 }, { wch: 80 }, { wch: 15 }, { wch: 15 }];
+  ws["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 6 } }];
+
+  XLSX.utils.book_append_sheet(wb, ws, "Company Work Records");
+  XLSX.writeFile(wb, `Company_Master_WorkRecords.xlsx`);
+}
+
 // ===== LOCAL STORAGE DATABASE =====
 function initRecordsDb() {
   let localData = localStorage.getItem("hie_work_records");
@@ -858,12 +1058,36 @@ function initRecordsDb() {
     localStorage.removeItem("hie_work_records");
     localData = null;
   }
-  
+
   if (localData) {
     dbRecords = JSON.parse(localData);
   } else {
     const initialSeed = [];
-    
+
+    // Seed Team Lead Praveen Kumar's work records
+    const praveenSeeds = [
+      { app: "EtaPrise", feature: "System Architecture", task: "Omni Inside System Architecture, Microservices & Database Schema Design", status: "completed" },
+      { app: "EtaPrise", feature: "Sprint Management", task: "Sprint Planning, Developer Task Assignment, Velocity & Milestone Tracking", status: "completed" },
+      { app: "EtaPrise", feature: "Code Review & QA", task: "Comprehensive Code Review & Pull Request Approval for Full-Stack Team", status: "completed" },
+      { app: "Fleet Management", feature: "Rule Engine Review", task: "Architected Driver Assignment Rule Engine & Route Optimization Logic", status: "completed" },
+      { app: "DevOps", feature: "Production Deployment", task: "Docker Containerization, K8s Cluster Management & Jenkins CI/CD Hardening", status: "completed" },
+      { app: "AI-Studio", feature: "Chatbot Architecture", task: "Evaluated AI Studio LLM Chatbot APIs & Knowledge Base Ingestion Pipeline", status: "completed" },
+      { app: "Security", feature: "SonarQube & OWASP", task: "Security Vulnerability Mitigation & Code Quality Assurance Audit", status: "completed" },
+      { app: "Database", feature: "PostgreSQL Tuning", task: "Database Indexing, Query Optimization & Connection Pool Tuning", status: "progress" }
+    ];
+
+    praveenSeeds.forEach((s, i) => {
+      initialSeed.push({
+        id: "rec-praveen-" + i,
+        memberKey: "praveen",
+        app: s.app,
+        feature: s.feature,
+        task: s.task,
+        date: "2026-08-22",
+        status: s.status
+      });
+    });
+
     // Seed Prince's exact 20 work records from spreadsheet
     const princeSeeds = [
       { app: "EtaPrise", feature: "Controlpanel", task: "Design Summry Card Appointment,Contract,Contact,Leave", status: "completed" },
@@ -1054,6 +1278,31 @@ function initRecordsDb() {
     dbRecords = initialSeed;
     saveRecordsToLocal();
   }
+
+  if (dbRecords && !dbRecords.some(r => r.memberKey === "praveen")) {
+    const praveenSeeds = [
+      { app: "EtaPrise", feature: "System Architecture", task: "Omni Inside System Architecture, Microservices & Database Schema Design", status: "completed" },
+      { app: "EtaPrise", feature: "Sprint Management", task: "Sprint Planning, Developer Task Assignment, Velocity & Milestone Tracking", status: "completed" },
+      { app: "EtaPrise", feature: "Code Review & QA", task: "Comprehensive Code Review & Pull Request Approval for Full-Stack Team", status: "completed" },
+      { app: "Fleet Management", feature: "Rule Engine Review", task: "Architected Driver Assignment Rule Engine & Route Optimization Logic", status: "completed" },
+      { app: "DevOps", feature: "Production Deployment", task: "Docker Containerization, K8s Cluster Management & Jenkins CI/CD Hardening", status: "completed" },
+      { app: "AI-Studio", feature: "Chatbot Architecture", task: "Evaluated AI Studio LLM Chatbot APIs & Knowledge Base Ingestion Pipeline", status: "completed" },
+      { app: "Security", feature: "SonarQube & OWASP", task: "Security Vulnerability Mitigation & Code Quality Assurance Audit", status: "completed" },
+      { app: "Database", feature: "PostgreSQL Tuning", task: "Database Indexing, Query Optimization & Connection Pool Tuning", status: "progress" }
+    ];
+    praveenSeeds.forEach((s, i) => {
+      dbRecords.unshift({
+        id: "rec-praveen-" + i,
+        memberKey: "praveen",
+        app: s.app,
+        feature: s.feature,
+        task: s.task,
+        date: "2026-08-22",
+        status: s.status
+      });
+    });
+    saveRecordsToLocal();
+  }
 }
 
 function saveRecordsToLocal() {
@@ -1064,86 +1313,105 @@ function saveRecordsToLocal() {
 function showCompanyRecords() {
   currentMember = null;
   currentTab = "company-records";
-  
+
   // Hide sections
   welcomeSection.style.display = "none";
   memberDetail.style.display = "none";
-  
+
   // Show Company Records Panel
   const companyRecordsSection = document.getElementById("companyRecordsSection");
   companyRecordsSection.style.display = "block";
   companyRecordsSection.style.animation = "none";
   requestAnimationFrame(() => { companyRecordsSection.style.animation = "fadeIn 0.4s ease"; });
-  
+
   bcMember.textContent = "Company Records";
-  
+
   // Reset query state
   masterQuery.page = 1;
   masterQuery.search = "";
   masterQuery.status = "all";
   masterQuery.sort = "date-desc";
-  
+
   // Bind master input elements
   $("#masterSearchInput").val("");
   $("#masterSortSelect").val("date-desc");
   $(".company-records-section .filter-tag").removeClass("active").first().addClass("active");
-  
+
   // Bind master event handlers once
-  $("#masterSearchInput").off("keyup input").on("keyup input", function() {
+  $("#masterSearchInput").off("keyup input").on("keyup input", function () {
     masterQuery.search = $(this).val();
     masterQuery.page = 1;
     renderMasterRecords();
   });
-  
-  $("#masterSortSelect").off("change").on("change", function() {
+
+  $("#masterSortSelect").off("change").on("change", function () {
     masterQuery.sort = $(this).val();
     masterQuery.page = 1;
     renderMasterRecords();
   });
-  
-  $(".company-records-section .filter-tag").off("click").on("click", function() {
+
+  $(".company-records-section .filter-tag").off("click").on("click", function () {
     $(".company-records-section .filter-tag").removeClass("active");
     $(this).addClass("active");
     masterQuery.status = $(this).data("filter");
     masterQuery.page = 1;
     renderMasterRecords();
   });
-  
-  $("#masterAddBtn").off("click").on("click", function() {
+
+  $("#masterExportPdfBtn").off("click").on("click", function () {
+    const list = getFilteredMasterRecords();
+    exportMasterPDF(list);
+  });
+
+  $("#masterExportExcelBtn").off("click").on("click", function () {
+    const list = getFilteredMasterRecords();
+    exportMasterExcel(list);
+  });
+
+  $("#companyBackBtn").off("click").on("click", function () {
+    $("#backBtn").trigger("click");
+  });
+
+  $("#masterAddBtn").off("click").on("click", function () {
     openAddModal();
   });
-  
+
   // Initial render
   renderMasterRecords();
-  
+
   if (window.innerWidth <= 768) closeMobileSidebar();
+}
+
+function getFilteredMasterRecords() {
+  let filtered = dbRecords.map(r => {
+    const m = members[r.memberKey] || { name: "Unknown", role: "Developer", color: "#6b5fa0", solidColor: "#6b5fa0" };
+    return { ...r, empName: m.name, empRole: m.role, empColor: m.solidColor, empAvatar: m.avatar };
+  });
+
+  if (masterQuery.status !== "all") {
+    filtered = filtered.filter(r => r.status === masterQuery.status);
+  }
+
+  if (masterQuery.search) {
+    const q = masterQuery.search.toLowerCase().trim();
+    filtered = filtered.filter(r =>
+      r.empName.toLowerCase().includes(q) ||
+      r.app.toLowerCase().includes(q) ||
+      r.feature.toLowerCase().includes(q) ||
+      r.task.toLowerCase().includes(q)
+    );
+  }
+  return filtered;
 }
 
 // ===== MASTER RECORDS RENDER ENGINE =====
 function renderMasterRecords() {
   // 1. Filter
-  let filtered = dbRecords.map(r => {
-    const m = members[r.memberKey] || { name: "Unknown", role: "Developer", color: "#6b5fa0", solidColor: "#6b5fa0" };
-    return { ...r, empName: m.name, empRole: m.role, empColor: m.solidColor, empAvatar: m.avatar };
-  });
-  
-  if (masterQuery.status !== "all") {
-    filtered = filtered.filter(r => r.status === masterQuery.status);
-  }
-  
-  if (masterQuery.search) {
-    const q = masterQuery.search.toLowerCase().trim();
-    filtered = filtered.filter(r => 
-      r.empName.toLowerCase().includes(q) || 
-      r.app.toLowerCase().includes(q) || 
-      r.feature.toLowerCase().includes(q) || 
-      r.task.toLowerCase().includes(q)
-    );
-  }
-  
+  let filtered = getFilteredMasterRecords();
+
   // Update stats label
   $("#masterEntriesCount").text(filtered.length + (filtered.length === 1 ? " Entry" : " Entries"));
-  
+
   // 2. Sort
   filtered.sort((a, b) => {
     if (masterQuery.sort === "date-desc") return new Date(b.date) - new Date(a.date);
@@ -1152,29 +1420,29 @@ function renderMasterRecords() {
     if (masterQuery.sort === "status-asc") return a.status.localeCompare(b.status);
     return 0;
   });
-  
+
   // 3. Paginate
   const total = filtered.length;
   const pages = Math.ceil(total / masterQuery.limit) || 1;
   if (masterQuery.page > pages) masterQuery.page = pages;
-  
+
   const start = (masterQuery.page - 1) * masterQuery.limit;
   const end = Math.min(start + masterQuery.limit, total);
   const sliced = filtered.slice(start, end);
-  
+
   // Render table rows
   const tbody = $("#masterTable tbody");
   tbody.empty();
-  
+
   if (sliced.length === 0) {
-    tbody.append(`<tr><td colspan="7" style="text-align:center; padding:30px; color:#8c8599;">No records found matching criteria.</td></tr>`);
+    tbody.append(`<tr><td colspan="8" style="text-align:center; padding:30px; color:#8c8599;">No records found matching criteria.</td></tr>`);
   } else {
     sliced.forEach((r, idx) => {
       const globalIndex = start + idx + 1;
-      const avatarHtml = r.empAvatar 
+      const avatarHtml = r.empAvatar
         ? `<img src="${r.empAvatar}" alt="${r.empName}" class="emp-avatar" style="object-fit:cover;" />`
         : `<div class="emp-avatar" style="background:${r.empColor}">${r.empName[0]}</div>`;
-        
+
       tbody.append(`
         <tr class="${idx % 2 === 0 ? 'wr-row-even' : 'wr-row-odd'}">
           <td class="wr-num">${globalIndex}</td>
@@ -1189,12 +1457,9 @@ function renderMasterRecords() {
           </td>
           <td><span class="wr-app-badge badge-eta">${r.app}</span></td>
           <td class="wr-feature" style="font-weight:600; color:#1a1035;">${r.feature}</td>
-          <td class="wr-task" style="color:#6e6580; font-size:0.85rem;">
-            <div style="font-weight:600; color:#5c536b; margin-bottom:2px;">${r.task.substring(0, 30)}...</div>
-            <span style="font-size:0.75rem; color:#8c8599;">Work Date</span>
-          </td>
-          <td style="color:#6e6580; font-size:0.85rem;">
-            ${new Date(r.date).toLocaleDateString("en-IN", { day:"2-digit", month:"short", year:"numeric" })}
+          <td class="wr-task" style="color:#6e6580; font-size:0.85rem;">${r.task}</td>
+          <td style="color:#6e6580; font-size:0.85rem; white-space:nowrap;">
+            ${new Date(r.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
           </td>
           <td>
             <span class="badge-status status-${r.status}" data-id="${r.id}">
@@ -1212,10 +1477,10 @@ function renderMasterRecords() {
       `);
     });
   }
-  
+
   // Render Pagination controls
   renderPagination("#masterPagination", masterQuery, total, pages, renderMasterRecords);
-  
+
   // Bind actions
   bindTableActionEvents("#masterTable", renderMasterRecords);
 }
@@ -1224,23 +1489,23 @@ function renderMasterRecords() {
 function renderMemberRecords() {
   const m = members[currentMember];
   let filtered = dbRecords.filter(r => r.memberKey === currentMember);
-  
+
   if (memberQuery.status !== "all") {
     filtered = filtered.filter(r => r.status === memberQuery.status);
   }
-  
+
   if (memberQuery.search) {
     const q = memberQuery.search.toLowerCase().trim();
-    filtered = filtered.filter(r => 
-      r.app.toLowerCase().includes(q) || 
-      r.feature.toLowerCase().includes(q) || 
+    filtered = filtered.filter(r =>
+      r.app.toLowerCase().includes(q) ||
+      r.feature.toLowerCase().includes(q) ||
       r.task.toLowerCase().includes(q)
     );
   }
-  
+
   // Update stats label
   $("#entriesCount").text(filtered.length + (filtered.length === 1 ? " Entry" : " Entries"));
-  
+
   // Sort
   filtered.sort((a, b) => {
     if (memberQuery.sort === "date-desc") return new Date(b.date) - new Date(a.date);
@@ -1249,19 +1514,19 @@ function renderMemberRecords() {
     if (memberQuery.sort === "status-asc") return a.status.localeCompare(b.status);
     return 0;
   });
-  
+
   // Paginate
   const total = filtered.length;
   const pages = Math.ceil(total / memberQuery.limit) || 1;
   if (memberQuery.page > pages) memberQuery.page = pages;
-  
+
   const start = (memberQuery.page - 1) * memberQuery.limit;
   const end = Math.min(start + memberQuery.limit, total);
   const sliced = filtered.slice(start, end);
-  
+
   const tbody = $("#wrTable tbody");
   tbody.empty();
-  
+
   if (sliced.length === 0) {
     tbody.append(`<tr><td colspan="7" style="text-align:center; padding:30px; color:#8c8599;">No records found matching criteria.</td></tr>`);
   } else {
@@ -1274,7 +1539,7 @@ function renderMemberRecords() {
           <td class="wr-feature" style="font-weight:600; color:#1a1035;">${r.feature}</td>
           <td class="wr-task" style="color:#6e6580; font-size:0.85rem;">${r.task}</td>
           <td style="color:#6e6580; font-size:0.85rem; white-space:nowrap;">
-            ${new Date(r.date).toLocaleDateString("en-IN", { day:"2-digit", month:"short", year:"numeric" })}
+            ${new Date(r.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
           </td>
           <td>
             <span class="badge-status status-${r.status}" data-id="${r.id}">
@@ -1292,10 +1557,10 @@ function renderMemberRecords() {
       `);
     });
   }
-  
+
   // Render Pagination controls
   renderPagination("#memberPagination", memberQuery, total, pages, renderMemberRecords);
-  
+
   // Bind actions
   bindTableActionEvents("#wrTable", renderMemberRecords);
 }
@@ -1308,35 +1573,35 @@ function getFilteredMemberRecords() {
 function renderPagination(containerId, queryObj, total, pages, renderFn) {
   const container = $(containerId);
   container.empty();
-  
+
   const startEntry = total === 0 ? 0 : (queryObj.page - 1) * queryObj.limit + 1;
   const endEntry = Math.min(startEntry + queryObj.limit - 1, total);
-  
+
   const infoSpan = `<span class="pag-info">Showing ${startEntry} to ${endEntry} of ${total} entries</span>`;
-  
+
   let buttonsHtml = '<div class="pag-buttons">';
-  
+
   // Prev button
   const prevDisabled = queryObj.page === 1 ? 'disabled' : '';
   buttonsHtml += `<button class="pag-btn pag-btn-wide ${prevDisabled}" data-page="${queryObj.page - 1}">Previous</button>`;
-  
+
   // Page buttons
   for (let p = 1; p <= pages; p++) {
     const activeClass = queryObj.page === p ? 'active' : '';
     buttonsHtml += `<button class="pag-btn ${activeClass}" data-page="${p}">${p}</button>`;
   }
-  
+
   // Next button
   const nextDisabled = queryObj.page === pages ? 'disabled' : '';
   buttonsHtml += `<button class="pag-btn pag-btn-wide ${nextDisabled}" data-page="${queryObj.page + 1}">Next</button>`;
-  
+
   buttonsHtml += '</div>';
-  
+
   container.append(infoSpan);
   container.append(buttonsHtml);
-  
+
   // Bind click actions
-  container.find(".pag-btn").off("click").on("click", function() {
+  container.find(".pag-btn").off("click").on("click", function () {
     if ($(this).hasClass("disabled") || $(this).hasClass("active")) return;
     queryObj.page = parseInt($(this).data("page"));
     renderFn();
@@ -1346,7 +1611,7 @@ function renderPagination(containerId, queryObj, total, pages, renderFn) {
 // ===== TABLE ACTIONS BINDINGS (CYCLE STATUS, EDIT, DELETE, DETAILS) =====
 function bindTableActionEvents(tableId, renderFn) {
   // 1. Status cycle (Pending -> In Progress -> Completed)
-  $(`${tableId} .badge-status`).off("click").on("click", function(e) {
+  $(`${tableId} .badge-status`).off("click").on("click", function (e) {
     e.stopPropagation();
     const id = $(this).data("id");
     const record = dbRecords.find(r => r.id === id);
@@ -1354,14 +1619,16 @@ function bindTableActionEvents(tableId, renderFn) {
       if (record.status === "pending") record.status = "progress";
       else if (record.status === "progress") record.status = "completed";
       else record.status = "pending";
-      
+
       saveRecordsToLocal();
+      renderMembersGrid();
+      renderSidebarNav();
       renderFn();
     }
   });
-  
+
   // 2. View details modal
-  $(`${tableId} .btn-view`).off("click").on("click", function(e) {
+  $(`${tableId} .btn-view`).off("click").on("click", function (e) {
     e.stopPropagation();
     const id = $(this).data("id");
     const r = dbRecords.find(x => x.id === id);
@@ -1370,26 +1637,26 @@ function bindTableActionEvents(tableId, renderFn) {
       $("#detailRecordEmployee").text(emp.name);
       $("#detailRecordApp").text(r.app);
       $("#detailRecordFeature").text(r.feature);
-      $("#detailRecordDate").text(new Date(r.date).toLocaleDateString("en-IN", { day:"2-digit", month:"short", year:"numeric" }));
-      
+      $("#detailRecordDate").text(new Date(r.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }));
+
       const badge = $("#detailRecordStatus");
       badge.removeClass().addClass(`badge-status status-${r.status}`);
       badge.text(r.status === "completed" ? "Completed" : r.status === "progress" ? "In Progress" : "Pending");
-      
+
       $("#detailRecordTask").text(r.task);
       $("#detailsModal").show();
     }
   });
-  
+
   // 3. Edit modal
-  $(`${tableId} .btn-edit`).off("click").on("click", function(e) {
+  $(`${tableId} .btn-edit`).off("click").on("click", function (e) {
     e.stopPropagation();
     const id = $(this).data("id");
     openEditModal(id, currentMember);
   });
-  
+
   // 4. Delete modal confirmation
-  $(`${tableId} .btn-delete`).off("click").on("click", function(e) {
+  $(`${tableId} .btn-delete`).off("click").on("click", function (e) {
     e.stopPropagation();
     const id = $(this).data("id");
     activeDeleteId = id;
@@ -1406,7 +1673,7 @@ function openAddModal(lockedMemberKey) {
   $("#recordTask").val("");
   $("#recordDate").val(new Date().toISOString().substring(0, 10)); // Default current date
   $("#recordStatus").val("completed");
-  
+
   if (lockedMemberKey) {
     $("#recordEmployee").val(lockedMemberKey).prop("disabled", true);
     $("#employeeSelectGroup").hide();
@@ -1414,14 +1681,14 @@ function openAddModal(lockedMemberKey) {
     $("#recordEmployee").val("prince").prop("disabled", false);
     $("#employeeSelectGroup").show();
   }
-  
+
   $("#recordModal").show();
 }
 
 function openEditModal(id, lockedMemberKey) {
   const r = dbRecords.find(x => x.id === id);
   if (!r) return;
-  
+
   $("#modalTitle").text("Edit Work Record");
   $("#recordId").val(r.id);
   $("#recordApp").val(r.app);
@@ -1429,7 +1696,7 @@ function openEditModal(id, lockedMemberKey) {
   $("#recordTask").val(r.task);
   $("#recordDate").val(r.date);
   $("#recordStatus").val(r.status);
-  
+
   if (lockedMemberKey) {
     $("#recordEmployee").val(r.memberKey).prop("disabled", true);
     $("#employeeSelectGroup").hide();
@@ -1437,27 +1704,27 @@ function openEditModal(id, lockedMemberKey) {
     $("#recordEmployee").val(r.memberKey).prop("disabled", false);
     $("#employeeSelectGroup").show();
   }
-  
+
   $("#recordModal").show();
 }
 
 // ===== REGISTER MODAL EVENT LISTENERS =====
 function setupModalEvents() {
   // Modal Overlays and Cancel buttons close them
-  $(".modal-overlay, #cancelRecordModal, #closeRecordModal").on("click", function() {
+  $(".modal-overlay, #cancelRecordModal, #closeRecordModal").on("click", function () {
     $("#recordModal").hide();
   });
-  
-  $(".modal-overlay, #cancelDeleteModal, #closeDeleteModal").on("click", function() {
+
+  $(".modal-overlay, #cancelDeleteModal, #closeDeleteModal").on("click", function () {
     $("#deleteConfirmModal").hide();
   });
-  
-  $(".modal-overlay, #closeDetailsModal, #closeDetailsBtn").on("click", function() {
+
+  $(".modal-overlay, #closeDetailsModal, #closeDetailsBtn").on("click", function () {
     $("#detailsModal").hide();
   });
-  
+
   // Submit record form (Add / Edit save)
-  $("#recordForm").on("submit", function(e) {
+  $("#recordForm").on("submit", function (e) {
     e.preventDefault();
     const id = $("#recordId").val();
     const memberKey = $("#recordEmployee").val();
@@ -1466,7 +1733,7 @@ function setupModalEvents() {
     const task = $("#recordTask").val();
     const date = $("#recordDate").val();
     const status = $("#recordStatus").val();
-    
+
     if (id) {
       // Edit mode
       const idx = dbRecords.findIndex(r => r.id === id);
@@ -1491,10 +1758,12 @@ function setupModalEvents() {
         status: status
       });
     }
-    
+
     saveRecordsToLocal();
+    renderMembersGrid();
+    renderSidebarNav();
     $("#recordModal").hide();
-    
+
     // Refresh the active view
     if (currentMember) {
       renderMemberRecords();
@@ -1502,15 +1771,17 @@ function setupModalEvents() {
       renderMasterRecords();
     }
   });
-  
+
   // Confirm Delete Action
-  $("#confirmDeleteBtn").on("click", function() {
+  $("#confirmDeleteBtn").on("click", function () {
     if (activeDeleteId) {
       dbRecords = dbRecords.filter(r => r.id !== activeDeleteId);
       saveRecordsToLocal();
+      renderMembersGrid();
+      renderSidebarNav();
       activeDeleteId = null;
       $("#deleteConfirmModal").hide();
-      
+
       // Refresh active view
       if (currentMember) {
         renderMemberRecords();
@@ -1521,7 +1792,7 @@ function setupModalEvents() {
   });
 
   // 1. Open Add Employee Modal
-  $("#addEmployeeBtn").off("click").on("click", function() {
+  $("#addEmployeeBtn").off("click").on("click", function () {
     $("#employeeModalTitle").text("Add New Employee");
     $("#employeeId").val("");
     $("#empFormName").val("");
@@ -1538,7 +1809,7 @@ function setupModalEvents() {
   });
 
   // 2. Open Edit Profile Modal (from header)
-  $("#editProfileBtn").off("click").on("click", function() {
+  $("#editProfileBtn").off("click").on("click", function () {
     if (!currentMember) return;
     const m = members[currentMember];
     $("#employeeModalTitle").text("Edit Employee Profile");
@@ -1547,15 +1818,15 @@ function setupModalEvents() {
     $("#empFormRole").val(m.role);
     $("#empFormEmail").val(m.info.Email || "");
     $("#empFormPhone").val(m.info.Phone || "");
-    
+
     let dateVal = new Date("2026-03-26").toISOString().substring(0, 10);
     if (m.info.Joined) {
       try {
         dateVal = new Date(m.info.Joined).toISOString().substring(0, 10);
-      } catch (err) {}
+      } catch (err) { }
     }
     $("#empFormJoined").val(dateVal);
-    
+
     $("#empFormLocation").val(m.info.Location || "");
     $("#empFormLead").val(m.info["Team Lead"] || "");
     $("#empFormColor").val(m.solidColor || "#7c3aed");
@@ -1565,12 +1836,12 @@ function setupModalEvents() {
   });
 
   // 3. Cancel/Close Employee Modal
-  $("#closeEmployeeModal, #cancelEmployeeModal").on("click", function() {
+  $("#closeEmployeeModal, #cancelEmployeeModal").on("click", function () {
     $("#employeeModal").hide();
   });
 
   // 4. Save Employee Form
-  $("#employeeForm").off("submit").on("submit", function(e) {
+  $("#employeeForm").off("submit").on("submit", function (e) {
     e.preventDefault();
     const id = $("#employeeId").val();
     const name = $("#empFormName").val();
@@ -1582,15 +1853,15 @@ function setupModalEvents() {
     const lead = $("#empFormLead").val();
     const color = $("#empFormColor").val();
     const tagsText = $("#empFormTags").val();
-    
+
     const tags = tagsText.split(",").map(t => t.trim()).filter(t => t.length > 0);
-    
+
     let formattedJoined = "26 March 2026";
     if (joinedVal) {
       const dt = new Date(joinedVal);
       formattedJoined = dt.toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric" });
     }
-    
+
     const colorsMap = {
       "#7c3aed": "linear-gradient(135deg,#7c3aed,#a78bfa)",
       "#0891b2": "linear-gradient(135deg,#0891b2,#06b6d4)",
@@ -1599,7 +1870,7 @@ function setupModalEvents() {
       "#d97706": "linear-gradient(135deg,#d97706,#fbbf24)"
     };
     const gradient = colorsMap[color] || colorsMap["#7c3aed"];
-    
+
     if (id) {
       const m = members[id];
       m.name = name;
@@ -1647,34 +1918,34 @@ function setupModalEvents() {
         reports: { completed: 0, inProgress: 0, pending: 0 }
       };
     }
-    
+
     saveMembersToLocal();
     populateEmployeeSelects();
     renderSidebarNav();
     setupSidebarNav();
     renderMembersGrid();
-    
+
     $("#employeeModal").hide();
-    
+
     if (id) {
       showMember(id, currentTab);
     }
   });
 
   // 5. Delete Employee Action
-  $("#deleteEmployeeBtn").off("click").on("click", function() {
+  $("#deleteEmployeeBtn").off("click").on("click", function () {
     const id = $("#employeeId").val();
     if (id && members[id]) {
       delete members[id];
       dbRecords = dbRecords.filter(r => r.memberKey !== id);
       saveMembersToLocal();
       saveRecordsToLocal();
-      
+
       populateEmployeeSelects();
       renderSidebarNav();
       setupSidebarNav();
       renderMembersGrid();
-      
+
       $("#employeeModal").hide();
       $("#backBtn").trigger("click");
     }
@@ -1696,9 +1967,18 @@ function initMembersDb() {
       localMembers = null;
     }
   }
-  
+
   if (localMembers) {
     members = JSON.parse(localMembers);
+    members.praveen = DEFAULT_MEMBERS.praveen; // Update TL data with full responsibilities
+
+    // Ensure all member emails use @envisionbeyond.com
+    Object.values(members).forEach(m => {
+      if (m.info && m.info.Email) {
+        m.info.Email = m.info.Email.replace("@hie.com", "@envisionbeyond.com");
+      }
+    });
+    saveMembersToLocal();
   } else {
     members = DEFAULT_MEMBERS;
     saveMembersToLocal();
@@ -1714,21 +1994,27 @@ function populateEmployeeSelects() {
   const select = $("#recordEmployee");
   select.empty();
   Object.entries(members).forEach(([key, m]) => {
-    select.append(`<option value="${key}">${m.name}</option>`);
+    const isLead = m.isLead || (m.role && m.role.toLowerCase().includes("lead"));
+    const label = isLead ? `${m.name} (Team Lead)` : m.name;
+    select.append(`<option value="${key}">${label}</option>`);
   });
 }
 
 function renderSidebarNav() {
   const list = $("#sidebarNavList");
   list.find("li:not(#nav-company-records)").remove();
-  
+  $("#badge-company-records").text(dbRecords.length);
+
   Object.entries(members).forEach(([key, m]) => {
     const taskCount = dbRecords.filter(r => r.memberKey === key).length;
+    const isLead = m.isLead || (m.role && m.role.toLowerCase().includes("lead"));
+    const leadBadge = isLead ? `<span class="nav-tl-tag" style="background:#7c3aed; color:#fff; font-size:0.65rem; font-weight:700; padding:1px 6px; border-radius:4px; margin-left:6px; letter-spacing:0.5px; vertical-align:middle;">TL</span>` : '';
+
     list.append(`
       <li class="nav-item" id="nav-${key}">
         <button class="nav-btn" data-member="${key}" aria-expanded="false">
           <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="white" stroke-width="2"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></span>
-          <span class="nav-label">${m.name}</span>
+          <span class="nav-label">${m.name}${leadBadge}</span>
           <span class="nav-badge" id="badge-${key}">${taskCount}</span>
           <svg class="nav-arrow" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
@@ -1750,10 +2036,10 @@ init();
   function setGreeting() {
     var hour = new Date().getHours();
     var text;
-    if (hour >= 5 && hour < 12)       { text = 'Good Morning'; }
+    if (hour >= 5 && hour < 12) { text = 'Good Morning'; }
     else if (hour >= 12 && hour < 17) { text = 'Good Afternoon'; }
     else if (hour >= 17 && hour < 21) { text = 'Good Evening'; }
-    else                              { text = 'Good Night'; }
+    else { text = 'Good Night'; }
 
     var $el = $('#welcomeGreeting');
     if ($el.length) $el.text(text);
@@ -1769,9 +2055,9 @@ init();
   var user = sessionStorage.getItem('wt_user') || 'admin';
   var initial = user.charAt(0).toUpperCase();
 
-  var $avatar   = $('#topbarAvatar');
-  var $ddIcon   = $('#avatarDdIcon');
-  var $ddName   = $('#avatarDdName');
+  var $avatar = $('#topbarAvatar');
+  var $ddIcon = $('#avatarDdIcon');
+  var $ddName = $('#avatarDdName');
   var $dropdown = $('#avatarDropdown');
 
   if ($avatar.length) {
