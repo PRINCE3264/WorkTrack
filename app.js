@@ -6,6 +6,116 @@ let activeDeleteId = null;
 
 let members = {};
 
+// Time Tracking & Work Management Global States
+var ttState = null;
+var ttClockInterval = null;
+var ttElapsedInterval = null;
+var ttBreakInterval = null;
+var ttTimerInterval = null;
+var webcamStream = null;
+var wmTasks = [];
+var currentCalendarMonth = new Date().getMonth();
+var currentCalendarYear = new Date().getFullYear();
+var currentActiveTask = null;
+
+/* ==========================================================================
+   SECURE JQUERY & AJAX API SERVICE LAYER
+   ========================================================================== */
+
+const WorkTrackAPI = (function ($) {
+  'use strict';
+
+  // Secure HTML Escaping to prevent XSS attacks
+  function sanitize(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#x27;')
+      .replace(/\//g, '&#x2F;');
+  }
+
+  // Generic Secure AJAX simulation & Live Promise/Deferred wrapper
+  function sendRequest(endpoint, method, payload) {
+    const dfd = $.Deferred();
+
+    setTimeout(function () {
+      try {
+        dfd.resolve({
+          status: 200,
+          success: true,
+          endpoint: endpoint,
+          data: payload,
+          timestamp: new Date().toISOString()
+        });
+      } catch (err) {
+        dfd.reject({
+          status: 500,
+          success: false,
+          error: err.message || 'Network request failed'
+        });
+      }
+    }, 40);
+
+    return dfd.promise();
+  }
+
+  return {
+    sanitize: sanitize,
+    request: sendRequest,
+
+    // Secure Auth API
+    Auth: {
+      getCurrentUser: function () {
+        return {
+          username: sanitize(sessionStorage.getItem('wt_user') || 'admin'),
+          name: sanitize(sessionStorage.getItem('wt_user_name') || 'Admin'),
+          role: sanitize(sessionStorage.getItem('wt_user_role') || 'Super Admin')
+        };
+      },
+      isAuthenticated: function () {
+        return sessionStorage.getItem('wt_auth') === 'true';
+      }
+    },
+
+    // Work Records API
+    Records: {
+      getAll: function () {
+        return sendRequest('/api/records', 'GET', dbRecords);
+      },
+      saveAll: function (records) {
+        dbRecords = records;
+        localStorage.setItem('hie_work_records', JSON.stringify(dbRecords));
+        return sendRequest('/api/records/sync', 'POST', dbRecords);
+      },
+      create: function (record) {
+        dbRecords.unshift(record);
+        localStorage.setItem('hie_work_records', JSON.stringify(dbRecords));
+        return sendRequest('/api/records/create', 'POST', record);
+      },
+      delete: function (id) {
+        dbRecords = dbRecords.filter(r => r.id !== id);
+        localStorage.setItem('hie_work_records', JSON.stringify(dbRecords));
+        return sendRequest('/api/records/delete', 'DELETE', { id: id });
+      }
+    },
+
+    // Time Tracking API
+    TimeTracking: {
+      getState: function () {
+        return sendRequest('/api/timetracking', 'GET', ttState);
+      },
+      saveState: function (state) {
+        ttState = state;
+        localStorage.setItem('wt_time_tracking', JSON.stringify(ttState));
+        return sendRequest('/api/timetracking/save', 'POST', ttState);
+      }
+    }
+  };
+})(jQuery);
+
 // ===== DEFAULT MEMBER DATA =====
 const DEFAULT_MEMBERS = {
   praveen: {
@@ -167,6 +277,7 @@ const DEFAULT_MEMBERS = {
   jigar: {
     name: "Jigar",
     role: "Full Stack Developer",
+    avatar: "image/jigar.jpg",
     color: "linear-gradient(135deg,#059669,#34d399)",
     solidColor: "#059669",
     tags: ["JavaScript", "React", "UI/UX", "DevOps", ".Net", "Angular", "PgAdmin"],
@@ -348,6 +459,9 @@ function init() {
   setupBackBtn();
   setupTabs();
   setupModalEvents();
+  initTimeTracking();
+  initWorkManagement();
+  updateDynamicCardDates();
 }
 
 // ===== MEMBERS GRID =====
@@ -379,6 +493,8 @@ function renderMembersGrid() {
   if (companyBadge) {
     companyBadge.textContent = dbRecords.length;
   }
+
+  updateDynamicCardDates();
 
   Object.entries(members).forEach(([key, m]) => {
     const card = document.createElement("div");
@@ -413,8 +529,15 @@ function showMember(key, tab) {
   const m = members[key];
   welcomeSection.style.display = "none";
   document.getElementById("companyRecordsSection").style.display = "none";
+  const ttSec = document.getElementById("timeTrackingSection"); if (ttSec) ttSec.style.display = "none";
+  const wmSec = document.getElementById("workManagementSection"); if (wmSec) wmSec.style.display = "none";
+
   const companyRecordsBtn = document.getElementById("companyRecordsBtn");
   if (companyRecordsBtn) companyRecordsBtn.classList.remove("active");
+  const timeTrackingBtn = document.getElementById("timeTrackingBtn");
+  if (timeTrackingBtn) timeTrackingBtn.classList.remove("active");
+  const workManagementBtn = document.getElementById("workManagementBtn");
+  if (workManagementBtn) workManagementBtn.classList.remove("active");
 
   memberDetail.style.display = "block";
   memberDetail.style.animation = "none";
@@ -735,14 +858,13 @@ function setupSidebarNav() {
     });
   });
 
-  // Company Records master button — opens Company Records page and toggles submenu
+  // Company Records master button
   const companyRecordsBtn = document.getElementById("companyRecordsBtn");
   if (companyRecordsBtn) {
     companyRecordsBtn.addEventListener("click", () => {
       const subMenu = document.getElementById("sub-company-records");
       const isExpanded = companyRecordsBtn.getAttribute("aria-expanded") === "true";
 
-      // Collapse all OTHER employee submenus (not this one)
       document.querySelectorAll(".nav-btn:not(#companyRecordsBtn)").forEach(b => {
         b.setAttribute("aria-expanded", "false");
         b.classList.remove("active");
@@ -753,48 +875,105 @@ function setupSidebarNav() {
         companyRecordsBtn.setAttribute("aria-expanded", "true");
         companyRecordsBtn.classList.add("active");
         if (subMenu) subMenu.classList.add("open");
-
-        // Open Company Records dashboard view
         showCompanyRecords();
-
-        // Highlight 'All Records' submenu link
         document.querySelectorAll(".sub-link").forEach(l => l.classList.remove("active"));
         const allLink = document.querySelector('.sub-link[data-section="company-records"][data-filter="all"]');
         if (allLink) allLink.classList.add("active");
       } else {
-        // Collapsed back - show welcome
         if (subMenu) subMenu.classList.remove("open");
         companyRecordsBtn.classList.remove("active");
         companyRecordsBtn.setAttribute("aria-expanded", "false");
         document.querySelectorAll(".sub-link").forEach(l => l.classList.remove("active"));
-
         currentMember = null;
         welcomeSection.style.display = "block";
         memberDetail.style.display = "none";
         document.getElementById("companyRecordsSection").style.display = "none";
+        const ttSec = document.getElementById("timeTrackingSection"); if (ttSec) ttSec.style.display = "none";
+        const wmSec = document.getElementById("workManagementSection"); if (wmSec) wmSec.style.display = "none";
         bcMember.textContent = "Overview";
       }
     });
   }
 
-  // Sub-links (employee tabs + company records filters)
+  // Time Tracking master button
+  const timeTrackingBtn = document.getElementById("timeTrackingBtn");
+  if (timeTrackingBtn) {
+    timeTrackingBtn.addEventListener("click", () => {
+      document.querySelectorAll(".nav-btn:not(#timeTrackingBtn)").forEach(b => {
+        b.setAttribute("aria-expanded", "false");
+        b.classList.remove("active");
+      });
+      document.querySelectorAll(".nav-submenu").forEach(s => s.classList.remove("open"));
+      document.querySelectorAll(".sub-link").forEach(l => l.classList.remove("active"));
+
+      timeTrackingBtn.classList.add("active");
+      showTimeTracking("clock-in");
+    });
+  }
+
+  // Work Management master button
+  const workManagementBtn = document.getElementById("workManagementBtn");
+  if (workManagementBtn) {
+    workManagementBtn.addEventListener("click", () => {
+      const subMenu = document.getElementById("sub-work-management");
+      const isExpanded = workManagementBtn.getAttribute("aria-expanded") === "true";
+
+      document.querySelectorAll(".nav-btn:not(#workManagementBtn)").forEach(b => {
+        b.setAttribute("aria-expanded", "false");
+        b.classList.remove("active");
+      });
+      document.querySelectorAll(".nav-submenu:not(#sub-work-management)").forEach(s => s.classList.remove("open"));
+
+      if (!isExpanded) {
+        workManagementBtn.setAttribute("aria-expanded", "true");
+        workManagementBtn.classList.add("active");
+        if (subMenu) subMenu.classList.add("open");
+        showWorkManagement("kanban");
+      } else {
+        if (subMenu) subMenu.classList.remove("open");
+        workManagementBtn.classList.remove("active");
+        workManagementBtn.setAttribute("aria-expanded", "false");
+        document.querySelectorAll(".sub-link").forEach(l => l.classList.remove("active"));
+        currentMember = null;
+        welcomeSection.style.display = "block";
+        memberDetail.style.display = "none";
+        document.getElementById("companyRecordsSection").style.display = "none";
+        const ttSec = document.getElementById("timeTrackingSection"); if (ttSec) ttSec.style.display = "none";
+        const wmSec = document.getElementById("workManagementSection"); if (wmSec) wmSec.style.display = "none";
+        bcMember.textContent = "Overview";
+      }
+    });
+  }
+
+  // Sub-links (employee tabs + company records filters + time tracking + work management)
   document.querySelectorAll(".sub-link").forEach(link => {
     link.addEventListener("click", (e) => {
       e.preventDefault();
       const member = link.dataset.member;
       const section = link.dataset.section;
-      const filter = link.dataset.filter; // only for company records
+      const filter = link.dataset.filter; // company records
+      const sub = link.dataset.sub; // time tracking / work management
 
       document.querySelectorAll(".sub-link").forEach(l => l.classList.remove("active"));
       link.classList.add("active");
 
+      if (section === "time-tracking") {
+        showTimeTracking(sub || "clock-in");
+        if (window.innerWidth <= 768) closeMobileSidebar();
+        return;
+      }
+
+      if (section === "work-management") {
+        showWorkManagement(sub || "kanban");
+        if (window.innerWidth <= 768) closeMobileSidebar();
+        return;
+      }
+
       if (filter !== undefined) {
-        // Company records sub-link: apply filter
         showCompanyRecords();
         masterQuery.status = filter;
         masterQuery.page = 1;
         renderMasterRecords();
-        // Sync filter tags UI
         document.querySelectorAll("#companyRecordsSection .filter-tag").forEach(t => {
           t.classList.toggle("active", t.dataset.filter === filter);
         });
@@ -1317,6 +1496,13 @@ function showCompanyRecords() {
   // Hide sections
   welcomeSection.style.display = "none";
   memberDetail.style.display = "none";
+  const ttSec = document.getElementById("timeTrackingSection"); if (ttSec) ttSec.style.display = "none";
+  const wmSec = document.getElementById("workManagementSection"); if (wmSec) wmSec.style.display = "none";
+
+  const timeTrackingBtn = document.getElementById("timeTrackingBtn");
+  if (timeTrackingBtn) timeTrackingBtn.classList.remove("active");
+  const workManagementBtn = document.getElementById("workManagementBtn");
+  if (workManagementBtn) workManagementBtn.classList.remove("active");
 
   // Show Company Records Panel
   const companyRecordsSection = document.getElementById("companyRecordsSection");
@@ -1971,6 +2157,9 @@ function initMembersDb() {
   if (localMembers) {
     members = JSON.parse(localMembers);
     members.praveen = DEFAULT_MEMBERS.praveen; // Update TL data with full responsibilities
+    if (members.jigar) {
+      members.jigar.avatar = "image/jigar.jpg";
+    }
 
     // Ensure all member emails use @envisionbeyond.com
     Object.values(members).forEach(m => {
@@ -2002,7 +2191,7 @@ function populateEmployeeSelects() {
 
 function renderSidebarNav() {
   const list = $("#sidebarNavList");
-  list.find("li:not(#nav-company-records)").remove();
+  list.find("li:not(#nav-company-records):not(#nav-time-tracking)").remove();
   $("#badge-company-records").text(dbRecords.length);
 
   Object.entries(members).forEach(([key, m]) => {
@@ -2028,8 +2217,7 @@ function renderSidebarNav() {
   });
 }
 
-// ===== START APPLICATION =====
-init();
+// ===== APPLICATION STARTUP LOGIC =====
 
 // ===== DYNAMIC TIME GREETING =====
 (function setupGreeting() {
@@ -2049,22 +2237,30 @@ init();
 })();
 
 
-// ===== LOGOUT / AVATAR DROPDOWN =====
+// ===== LOGOUT / AVATAR DROPDOWN & USER PROFILE =====
 (function setupLogout() {
-  // Populate avatar with logged-in user initial
-  var user = sessionStorage.getItem('wt_user') || 'admin';
-  var initial = user.charAt(0).toUpperCase();
+  // Populate user profile info from sessionStorage
+  var username = sessionStorage.getItem('wt_user') || 'admin';
+  var fullName = sessionStorage.getItem('wt_user_name') || (username.charAt(0).toUpperCase() + username.slice(1));
+  var role = sessionStorage.getItem('wt_user_role') || 'Super Admin';
+  var initial = (fullName || username).charAt(0).toUpperCase();
 
   var $avatar = $('#topbarAvatar');
   var $ddIcon = $('#avatarDdIcon');
   var $ddName = $('#avatarDdName');
   var $dropdown = $('#avatarDropdown');
 
-  if ($avatar.length) {
-    $avatar.text(initial);
-    $ddIcon.text(initial);
-    $ddName.text(user.charAt(0).toUpperCase() + user.slice(1));
-  }
+  var $sbAvatar = $('#sidebarUserAvatar');
+  var $sbName = $('#sidebarUserName');
+  var $sbRole = $('#sidebarUserRole');
+
+  if ($avatar.length) $avatar.text(initial);
+  if ($ddIcon.length) $ddIcon.text(initial);
+  if ($ddName.length) $ddName.text(fullName);
+
+  if ($sbAvatar.length) $sbAvatar.text(initial);
+  if ($sbName.length) $sbName.text(fullName);
+  if ($sbRole.length) $sbRole.text(role);
 
   // Toggle dropdown on avatar click
   $avatar.on('click', function (e) {
@@ -2086,6 +2282,1584 @@ init();
   $('#logoutBtn').on('click', function () {
     sessionStorage.removeItem('wt_auth');
     sessionStorage.removeItem('wt_user');
+    sessionStorage.removeItem('wt_user_name');
+    sessionStorage.removeItem('wt_user_role');
+    sessionStorage.removeItem('wt_user_email');
     window.location.replace('login.html');
   });
 })();
+
+
+/* ==========================================================================
+   TIME TRACKING MODULE ENGINE
+   ========================================================================== */
+
+function getTtState() {
+  const saved = localStorage.getItem("wt_time_tracking");
+  if (saved) {
+    try { return JSON.parse(saved); } catch (e) { }
+  }
+  const defaultState = {
+    isClockedIn: false,
+    clockInTime: null,
+    workMode: "Office",
+    snapshotImg: null,
+    activeBreak: null,
+    todayLogs: [
+      { type: "info", time: "09:00 AM", desc: "System initialized for today" }
+    ],
+    todayHoursFormatted: "0h 00m",
+    weekHoursFormatted: "38h 15m",
+    monthHoursFormatted: "162h 40m",
+    overtimeFormatted: "+3h 45m",
+    activeTaskTimer: null,
+    timerSessions: [
+      { id: 1, project: "EtaPrise ERP", task: "API Gateway Authorization", category: "Development", duration: "01:45:20", startedAt: "09:45 AM", status: "Completed" },
+      { id: 2, project: "WorkTrack", task: "Design Kanban Board & Subtasks", category: "Design", duration: "02:10:15", startedAt: "01:30 PM", status: "Completed" },
+      { id: 3, project: "ControlPanel", task: "Database Indexing & Query Tuning", category: "Testing", duration: "00:55:00", startedAt: "04:15 PM", status: "Completed" }
+    ],
+    timesheets: [
+      { day: "Mon", date: "Aug 17, 2026", clockIn: "09:28 AM", clockOut: "06:35 PM", breakDur: "45m", effective: "8h 22m", overtime: "+0h 22m", verified: true, status: "Approved" },
+      { day: "Tue", date: "Aug 18, 2026", clockIn: "09:30 AM", clockOut: "06:30 PM", breakDur: "45m", effective: "8h 15m", overtime: "+0h 15m", verified: true, status: "Approved" },
+      { day: "Wed", date: "Aug 19, 2026", clockIn: "09:15 AM", clockOut: "07:15 PM", breakDur: "50m", effective: "9h 10m", overtime: "+1h 10m", verified: true, status: "Approved" },
+      { day: "Thu", date: "Aug 20, 2026", clockIn: "09:32 AM", clockOut: "06:30 PM", breakDur: "45m", effective: "8h 13m", overtime: "+0h 13m", verified: true, status: "Approved" },
+      { day: "Fri", date: "Aug 21, 2026", clockIn: "09:20 AM", clockOut: "08:00 PM", breakDur: "55m", effective: "9h 45m", overtime: "+1h 45m", verified: true, status: "Approved" }
+    ],
+    adjustments: [
+      { id: "#ADJ-102", date: "2026-08-14", orig: "09:45 AM - 06:00 PM", req: "09:00 AM - 06:30 PM", reason: "Client deployment sync on-site", status: "Approved", approver: "Praveen Kumar" }
+    ]
+  };
+  localStorage.setItem("wt_time_tracking", JSON.stringify(defaultState));
+  return defaultState;
+}
+
+function saveTtState() {
+  localStorage.setItem("wt_time_tracking", JSON.stringify(ttState));
+}
+
+function initTimeTracking() {
+  ttState = getTtState();
+
+  // Digital Live Clock
+  function updateLiveClock() {
+    const now = new Date();
+    let hours = now.getHours();
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    const timeStr = `${String(hours).padStart(2, '0')}:${minutes}:${seconds} ${ampm}`;
+    const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+    $("#ttLiveTime").text(timeStr);
+    $("#ttLiveDate").text(dateStr);
+  }
+  updateLiveClock();
+  if (ttClockInterval) clearInterval(ttClockInterval);
+  ttClockInterval = setInterval(updateLiveClock, 1000);
+
+  // Tab Switcher inside Time Tracking
+  $("#ttTabBar .tab-btn").on("click", function () {
+    const targetTab = $(this).data("tt-tab");
+    switchTimeTrackingTab(targetTab);
+  });
+
+  // Work Mode Pills
+  $(".wm-btn").on("click", function () {
+    $(".wm-btn").removeClass("active");
+    $(this).addClass("active");
+    ttState.workMode = $(this).data("mode");
+    saveTtState();
+  });
+
+  // Clock In / Out Main Button
+  $("#ttMainClockBtn").on("click", handleClockInOutClick);
+
+  // Camera Modal controls
+  $("#closeCameraModal, #cancelCameraBtn, #cameraModal .modal-overlay").on("click", closeCameraModal);
+  $("#captureAndClockBtn").on("click", captureAndClockIn);
+
+  // Break pill clicks
+  $(".break-pill-btn").on("click", function () {
+    const type = $(this).data("type");
+    const dur = $(this).data("time");
+    startBreak(type, dur);
+  });
+
+  // End break button
+  $("#ttEndBreakBtn").on("click", endActiveBreak);
+
+  // Task Timer Stopwatch
+  $("#ttTimerStartBtn").on("click", startTaskTimer);
+  $("#ttTimerPauseBtn").on("click", pauseTaskTimer);
+  $("#ttTimerStopBtn").on("click", stopTaskTimer);
+
+  // Timesheets submit & approval
+  $("#ttSubmitTimesheetBtn").on("click", function () {
+    alert("Weekly timesheet submitted successfully for manager approval!");
+    const lastRow = ttState.timesheets[ttState.timesheets.length - 1];
+    if (lastRow) {
+      lastRow.status = "Pending Approval";
+      saveTtState();
+      renderTimesheets();
+    }
+  });
+
+  $("#ttApproveAllBtn").on("click", function () {
+    ttState.timesheets.forEach(t => { t.status = "Approved"; });
+    saveTtState();
+    renderTimesheets();
+    alert("All timesheet records approved by Super Admin!");
+  });
+
+  // Time Adjustment Modal
+  $("#ttOpenAdjustModalBtn").on("click", function () {
+    $("#adjDate").val(new Date().toISOString().split('T')[0]);
+    $("#adjustmentModal").show();
+  });
+  $("#closeAdjustmentModal, #cancelAdjustmentBtn, #adjustmentModal .modal-overlay").on("click", function () {
+    $("#adjustmentModal").hide();
+  });
+  $("#adjustmentForm").on("submit", function (e) {
+    e.preventDefault();
+    const newAdj = {
+      id: "#ADJ-" + (100 + ttState.adjustments.length + 1),
+      date: $("#adjDate").val(),
+      orig: "09:30 AM - 06:30 PM",
+      req: $("#adjClockIn").val() + " - " + $("#adjClockOut").val(),
+      reason: $("#adjReason").val(),
+      status: "Pending",
+      approver: "Manager Review"
+    };
+    ttState.adjustments.unshift(newAdj);
+    saveTtState();
+    renderAdjustments();
+    $("#adjustmentModal").hide();
+    $("#adjustmentForm")[0].reset();
+    alert("Adjustment request submitted successfully!");
+  });
+
+  // Back button in Time Tracking
+  $("#ttBackBtn").on("click", function () {
+    $("#timeTrackingSection").hide();
+    welcomeSection.style.display = "block";
+    bcMember.textContent = "Overview";
+    document.querySelectorAll(".nav-btn").forEach(b => { b.classList.remove("active"); b.setAttribute("aria-expanded", "false"); });
+    document.querySelectorAll(".nav-submenu").forEach(s => s.classList.remove("open"));
+    document.querySelectorAll(".sub-link").forEach(l => l.classList.remove("active"));
+  });
+
+  // Update UI on load
+  syncTtUi();
+}
+
+function switchTimeTrackingTab(tab) {
+  $("#ttTabBar .tab-btn").removeClass("active");
+  $(`#ttTabBar .tab-btn[data-tt-tab="${tab}"]`).addClass("active");
+
+  $("#ttPanelClockIn, #ttPanelTimer, #ttPanelTimesheets, #ttPanelAdjustments").hide();
+
+  if (tab === "clock-in") {
+    $("#ttPanelClockIn").fadeIn(200);
+    syncTtUi();
+  } else if (tab === "timer") {
+    $("#ttPanelTimer").fadeIn(200);
+    renderTimerSessions();
+  } else if (tab === "timesheets") {
+    $("#ttPanelTimesheets").fadeIn(200);
+    renderTimesheets();
+  } else if (tab === "adjustments") {
+    $("#ttPanelAdjustments").fadeIn(200);
+    renderAdjustments();
+  }
+}
+
+function syncTtUi() {
+  if (!ttState) return;
+
+  const loggedUser = sessionStorage.getItem("wt_user_name") || "Prince Patel";
+
+  if (ttState.isClockedIn) {
+    $("#ttHeaderStatusPill").removeClass("clocked-out on-break").addClass("clocked-in").text("Clocked In");
+    $("#ttMainClockBtn").removeClass("clock-in-state").addClass("clock-out-state");
+    $("#ttClockBtnIcon").text("logout");
+    $("#ttClockBtnText").text("CLOCK OUT");
+    $("#ttClockBtnSub").text("Click to finish work day");
+    $("#ttElapsedBox").show();
+
+    startElapsedWorkTicker();
+
+    if (ttState.snapshotImg) {
+      $("#ttSnapshotImg").attr("src", ttState.snapshotImg);
+      $("#ttSnapshotUser").text(loggedUser);
+      const inTime = new Date(ttState.clockInTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      $("#ttSnapshotTime").text("Clocked in at " + inTime);
+      $("#ttSnapshotMode").text("Location: " + (ttState.workMode || "Office"));
+      $("#ttSnapshotCard").show();
+    }
+  } else {
+    $("#ttHeaderStatusPill").removeClass("clocked-in on-break").addClass("clocked-out").text("Clocked Out");
+    $("#ttMainClockBtn").removeClass("clock-out-state").addClass("clock-in-state");
+    $("#ttClockBtnIcon").text("camera_alt");
+    $("#ttClockBtnText").text("CLOCK IN");
+    $("#ttClockBtnSub").text("Camera snapshot required");
+    $("#ttElapsedBox").hide();
+    if (ttElapsedInterval) clearInterval(ttElapsedInterval);
+  }
+
+  // Active Break UI
+  if (ttState.activeBreak) {
+    $("#ttHeaderStatusPill").removeClass("clocked-in clocked-out").addClass("on-break").text("On Break");
+    $("#ttBreakBannerText").text("You are currently taking a " + ttState.activeBreak.type);
+    $("#ttCurrentBreakType").text(ttState.activeBreak.type);
+    $("#ttActiveBreakPanel").show();
+    startBreakTicker();
+  } else {
+    $("#ttBreakBannerText").text(ttState.isClockedIn ? "You are currently Working (No active break)" : "Please Clock In to start working & tracking breaks");
+    $("#ttActiveBreakPanel").hide();
+    if (ttBreakInterval) clearInterval(ttBreakInterval);
+  }
+
+  // Today's Attendance Timeline
+  renderTodayTimeline();
+  updateDynamicCardDates();
+}
+
+function updateDynamicCardDates() {
+  const now = new Date();
+  const monthShort = now.toLocaleDateString('en-US', { month: 'short' });
+  const monthLong = now.toLocaleDateString('en-US', { month: 'long' });
+  const day = now.getDate();
+  const year = now.getFullYear();
+  const dayName = now.toLocaleDateString('en-US', { weekday: 'long' });
+
+  // Overview date card (displays current date & dynamic day e.g. 23 Aug / Sunday)
+  const dateStr = `${day} ${monthShort}`;
+  const dayLabel = dayName;
+
+  const $om = $("#overviewCurrentMonth");
+  if ($om.length) {
+    $om.text(dateStr);
+  } else {
+    const omEl = document.getElementById("overviewCurrentMonth");
+    if (omEl) omEl.textContent = dateStr;
+  }
+
+  const $oy = $("#overviewCurrentYear");
+  if ($oy.length) {
+    $oy.text(year);
+  } else {
+    const oyEl = document.getElementById("overviewCurrentYear");
+    if (oyEl) oyEl.textContent = year;
+  }
+
+  const $od = $("#overviewCurrentDateLabel");
+  if ($od.length) {
+    $od.text(dayLabel);
+  } else {
+    const odEl = document.getElementById("overviewCurrentDateLabel");
+    if (odEl) odEl.textContent = dayLabel;
+  }
+
+  // Time Tracking Cards
+  // 1. Today Date
+  $("#ttTodayDateLabel").text(`Today (${day} ${monthShort})`);
+
+  // 2. Week Range
+  const currentDay = now.getDay();
+  const diffToMonday = (currentDay + 6) % 7;
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - diffToMonday);
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+
+  const monStr = monday.getDate() + (monday.getMonth() !== now.getMonth() ? ' ' + monday.toLocaleDateString('en-US', { month: 'short' }) : '');
+  const sunStr = `${sunday.getDate()} ${sunday.toLocaleDateString('en-US', { month: 'short' })}`;
+  $("#ttWeekRangeLabel").text(`This Week (${monStr} - ${sunStr})`);
+
+  // 3. Month
+  $("#ttMonthNameLabel").text(`${monthLong} ${year}`);
+
+  // 4. Overtime
+  $("#ttOvertimeDateLabel").text(`Overtime (${monthShort} ${year})`);
+}
+
+function handleClockInOutClick() {
+  if (!ttState.isClockedIn) {
+    openCameraModal();
+  } else {
+    if (ttState.activeBreak) {
+      alert("Please end your active break before clocking out.");
+      return;
+    }
+    if (confirm("Are you sure you want to Clock Out and finalize today's work session?")) {
+      const now = new Date();
+      const outTimeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      ttState.isClockedIn = false;
+
+      // Compute elapsed
+      const inTime = new Date(ttState.clockInTime);
+      const diffMs = now - inTime;
+      const hours = Math.floor(diffMs / 3600000);
+      const mins = Math.floor((diffMs % 3600000) / 60000);
+      const totalWorkStr = `${hours}h ${mins}m`;
+
+      ttState.todayLogs.push({
+        type: "clock-out",
+        time: outTimeStr,
+        desc: `Clocked Out (${totalWorkStr} total session)`
+      });
+
+      // Update today's hours card
+      ttState.todayHoursFormatted = totalWorkStr;
+      $("#ttTodayHours").text(totalWorkStr);
+
+      saveTtState();
+      syncTtUi();
+    }
+  }
+}
+
+function openCameraModal() {
+  $("#cameraErrorNote").hide();
+  $("#cameraModal").show();
+
+  const video = document.getElementById("webcamVideo");
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: "user" } })
+      .then(function (stream) {
+        webcamStream = stream;
+        video.srcObject = stream;
+        video.play();
+      })
+      .catch(function (err) {
+        console.warn("Camera access warning:", err);
+        $("#cameraErrorNote").text("Camera not accessible (" + (err.message || "Permission denied") + "). Fallback verification will be used.").show();
+      });
+  } else {
+    $("#cameraErrorNote").text("Camera not supported on this browser. Avatar verification will be used.").show();
+  }
+}
+
+function closeCameraModal() {
+  if (webcamStream) {
+    webcamStream.getTracks().forEach(track => track.stop());
+    webcamStream = null;
+  }
+  $("#cameraModal").hide();
+}
+
+function captureAndClockIn() {
+  const video = document.getElementById("webcamVideo");
+  const canvas = document.getElementById("snapshotCanvas");
+  let photoDataUrl = "";
+
+  if (webcamStream && video.videoWidth) {
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext("2d");
+    // Draw mirrored
+    ctx.translate(canvas.width, 0);
+    ctx.scale(-1, 1);
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    // Reset transform for watermark
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.fillStyle = "rgba(0,0,0,0.6)";
+    ctx.fillRect(10, canvas.height - 36, canvas.width - 20, 26);
+    ctx.fillStyle = "#10b981";
+    ctx.font = "bold 13px Inter, sans-serif";
+    ctx.fillText("✓ WorkTrack Verified • " + new Date().toLocaleString(), 20, canvas.height - 18);
+
+    photoDataUrl = canvas.toDataURL("image/jpeg", 0.85);
+  } else {
+    // Generate an SVG-based fallback avatar snapshot
+    const userName = sessionStorage.getItem("wt_user_name") || "Prince Patel";
+    const initial = userName.charAt(0).toUpperCase();
+    canvas.width = 300;
+    canvas.height = 300;
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#7c3aed";
+    ctx.fillRect(0, 0, 300, 300);
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 90px Inter, sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(initial, 150, 130);
+    ctx.font = "bold 16px Inter, sans-serif";
+    ctx.fillText(userName, 150, 220);
+    ctx.font = "12px Inter, sans-serif";
+    ctx.fillStyle = "#a7f3d0";
+    ctx.fillText("✓ Verified Clock-In", 150, 245);
+    photoDataUrl = canvas.toDataURL("image/jpeg", 0.85);
+  }
+
+  closeCameraModal();
+
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+  ttState.isClockedIn = true;
+  ttState.clockInTime = now.toISOString();
+  ttState.snapshotImg = photoDataUrl;
+  ttState.todayLogs.push({
+    type: "clock-in",
+    time: timeStr,
+    desc: `Clocked In with camera snapshot (${ttState.workMode})`
+  });
+
+  saveTtState();
+  syncTtUi();
+}
+
+function startElapsedWorkTicker() {
+  if (ttElapsedInterval) clearInterval(ttElapsedInterval);
+
+  function tick() {
+    if (!ttState.isClockedIn || !ttState.clockInTime) return;
+    const diff = Math.floor((new Date() - new Date(ttState.clockInTime)) / 1000);
+    const hrs = String(Math.floor(diff / 3600)).padStart(2, '0');
+    const mins = String(Math.floor((diff % 3600) / 60)).padStart(2, '0');
+    const secs = String(diff % 60).padStart(2, '0');
+    $("#ttElapsedTime").text(`${hrs}:${mins}:${secs}`);
+    $("#ttTodayHours").text(`${parseInt(hrs, 10)}h ${parseInt(mins, 10)}m`);
+  }
+  tick();
+  ttElapsedInterval = setInterval(tick, 1000);
+}
+
+function startBreak(type, plannedMins) {
+  if (!ttState.isClockedIn) {
+    alert("Please Clock In first before taking a break!");
+    return;
+  }
+  if (ttState.activeBreak) {
+    alert("You are already on a break. End current break first.");
+    return;
+  }
+
+  const now = new Date();
+  ttState.activeBreak = {
+    type: type,
+    startTime: now.toISOString(),
+    plannedMinutes: plannedMins
+  };
+
+  ttState.todayLogs.push({
+    type: "break-start",
+    time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    desc: `Started ${type} (${plannedMins}m planned)`
+  });
+
+  saveTtState();
+  syncTtUi();
+}
+
+function startBreakTicker() {
+  if (ttBreakInterval) clearInterval(ttBreakInterval);
+
+  function tick() {
+    if (!ttState.activeBreak) return;
+    const diff = Math.floor((new Date() - new Date(ttState.activeBreak.startTime)) / 1000);
+    const mins = String(Math.floor(diff / 60)).padStart(2, '0');
+    const secs = String(diff % 60).padStart(2, '0');
+    $("#ttBreakTimer").text(`${mins}:${secs}`);
+  }
+  tick();
+  ttBreakInterval = setInterval(tick, 1000);
+}
+
+function endActiveBreak() {
+  if (!ttState.activeBreak) return;
+
+  const now = new Date();
+  const diffSecs = Math.floor((now - new Date(ttState.activeBreak.startTime)) / 1000);
+  const mins = Math.max(1, Math.round(diffSecs / 60));
+  const type = ttState.activeBreak.type;
+
+  ttState.todayLogs.push({
+    type: "break-end",
+    time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    desc: `Ended ${type} (${mins} mins duration)`
+  });
+
+  ttState.activeBreak = null;
+  saveTtState();
+  syncTtUi();
+}
+
+function renderTodayTimeline() {
+  const $list = $("#ttTodayLogsList");
+  $list.empty();
+
+  if (!ttState.todayLogs || !ttState.todayLogs.length) {
+    $list.html('<div style="font-size:0.75rem; color:#a099af; padding:8px;">No activity logged yet today.</div>');
+    return;
+  }
+
+  ttState.todayLogs.slice().reverse().forEach(log => {
+    let dotColor = "#7c3aed";
+    if (log.type === "clock-in") dotColor = "#10b981";
+    if (log.type === "clock-out") dotColor = "#ef4444";
+    if (log.type && log.type.includes("break")) dotColor = "#f59e0b";
+
+    $list.append(`
+      <div class="tt-log-item">
+        <div class="tt-log-left">
+          <span class="tt-log-dot" style="background:${dotColor}"></span>
+          <span style="font-weight:600; color:#1a1035;">${log.desc}</span>
+        </div>
+        <span style="color:#6b5fa0; font-size:0.74rem;">${log.time}</span>
+      </div>
+    `);
+  });
+}
+
+// Live Task Stopwatch Timer
+let timerElapsedSeconds = 0;
+let timerRunning = false;
+
+function startTaskTimer() {
+  const taskName = $.trim($("#ttTimerTaskName").val());
+  if (!taskName) {
+    alert("Please enter what task you are working on!");
+    $("#ttTimerTaskName").focus();
+    return;
+  }
+  timerRunning = true;
+  $("#ttTimerStartBtn").hide();
+  $("#ttTimerPauseBtn").show();
+  $("#ttTimerStopBtn").show();
+
+  if (ttTimerInterval) clearInterval(ttTimerInterval);
+  ttTimerInterval = setInterval(function () {
+    timerElapsedSeconds++;
+    const hrs = String(Math.floor(timerElapsedSeconds / 3600)).padStart(2, '0');
+    const mins = String(Math.floor((timerElapsedSeconds % 3600) / 60)).padStart(2, '0');
+    const secs = String(timerElapsedSeconds % 60).padStart(2, '0');
+    $("#ttStopwatch").text(`${hrs}:${mins}:${secs}`);
+  }, 1000);
+}
+
+function pauseTaskTimer() {
+  timerRunning = false;
+  clearInterval(ttTimerInterval);
+  $("#ttTimerPauseBtn").hide();
+  $("#ttTimerStartBtn").show().html('<span class="material-icons">play_arrow</span> Resume');
+}
+
+function stopTaskTimer() {
+  if (ttTimerInterval) clearInterval(ttTimerInterval);
+  timerRunning = false;
+
+  const project = $("#ttTimerProject").val();
+  const task = $("#ttTimerTaskName").val() || "General Task";
+  const category = $("#ttTimerCategory").val();
+
+  const hrs = String(Math.floor(timerElapsedSeconds / 3600)).padStart(2, '0');
+  const mins = String(Math.floor((timerElapsedSeconds % 3600) / 60)).padStart(2, '0');
+  const secs = String(timerElapsedSeconds % 60).padStart(2, '0');
+  const durStr = `${hrs}:${mins}:${secs}`;
+
+  const newSession = {
+    id: ttState.timerSessions.length + 1,
+    project: project,
+    task: task,
+    category: category,
+    duration: durStr,
+    startedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    status: "Completed"
+  };
+
+  ttState.timerSessions.unshift(newSession);
+  saveTtState();
+
+  // Reset
+  timerElapsedSeconds = 0;
+  $("#ttStopwatch").text("00:00:00");
+  $("#ttTimerTaskName").val("");
+  $("#ttTimerStartBtn").show().html('<span class="material-icons">play_arrow</span> Start Timer');
+  $("#ttTimerPauseBtn").hide();
+  $("#ttTimerStopBtn").hide();
+
+  renderTimerSessions();
+}
+
+function renderTimerSessions() {
+  const $tb = $("#ttSessionsTableBody");
+  $tb.empty();
+  $("#ttSessionCount").text(ttState.timerSessions.length + " Recorded Sessions");
+
+  ttState.timerSessions.forEach((s, idx) => {
+    $tb.append(`
+      <tr>
+        <td>${idx + 1}</td>
+        <td><strong>${s.project}</strong></td>
+        <td>${s.task}</td>
+        <td><span class="tag">${s.category}</span></td>
+        <td><strong style="color:#7c3aed;">${s.duration}</strong></td>
+        <td>${s.startedAt}</td>
+        <td><span class="status-badge status-completed">${s.status}</span></td>
+        <td>
+          <button type="button" class="btn-icon btn-delete" onclick="deleteTimerSession(${s.id})" title="Delete session">
+            <span class="material-icons">delete</span>
+          </button>
+        </td>
+      </tr>
+    `);
+  });
+}
+
+window.deleteTimerSession = function (id) {
+  ttState.timerSessions = ttState.timerSessions.filter(s => s.id !== id);
+  saveTtState();
+  renderTimerSessions();
+};
+
+function renderTimesheets() {
+  const $tb = $("#ttWeeklyTableBody");
+  $tb.empty();
+
+  ttState.timesheets.forEach(ts => {
+    const isApproved = ts.status === "Approved";
+    const statusBadge = isApproved
+      ? '<span class="status-badge status-completed">✓ Approved</span>'
+      : `<span class="status-badge status-progress">${ts.status}</span>`;
+
+    $tb.append(`
+      <tr>
+        <td><strong>${ts.day}</strong></td>
+        <td>${ts.date}</td>
+        <td>${ts.clockIn}</td>
+        <td>${ts.clockOut}</td>
+        <td>${ts.breakDur}</td>
+        <td><strong>${ts.effective}</strong></td>
+        <td><span style="color:#10b981; font-weight:700;">${ts.overtime}</span></td>
+        <td><span style="color:#10b981; font-size:0.8rem;">● Photo Verified</span></td>
+        <td>${statusBadge}</td>
+      </tr>
+    `);
+  });
+}
+
+function renderAdjustments() {
+  const $tb = $("#ttAdjustTableBody");
+  $tb.empty();
+
+  if (!ttState.adjustments || !ttState.adjustments.length) {
+    $tb.append('<tr><td colspan="8" style="text-align:center; color:#a099af; padding:16px;">No adjustment requests.</td></tr>');
+    return;
+  }
+
+  ttState.adjustments.forEach(adj => {
+    const isPending = adj.status === "Pending";
+    const badge = isPending
+      ? '<span class="status-badge status-progress">Pending Review</span>'
+      : (adj.status === "Approved" ? '<span class="status-badge status-completed">Approved</span>' : '<span class="status-badge status-pending">Rejected</span>');
+
+    const actions = isPending ? `
+      <button class="export-btn" style="padding:4px 8px; font-size:0.74rem; background:#10b981; color:#fff;" onclick="approveAdjustment('${adj.id}')">Approve</button>
+      <button class="export-btn" style="padding:4px 8px; font-size:0.74rem; background:#ef4444; color:#fff;" onclick="rejectAdjustment('${adj.id}')">Reject</button>
+    ` : '<span style="font-size:0.75rem; color:#a099af;">Finalized</span>';
+
+    $tb.append(`
+      <tr>
+        <td><strong>${adj.id}</strong></td>
+        <td>${adj.date}</td>
+        <td>${adj.orig}</td>
+        <td><strong style="color:#7c3aed;">${adj.req}</strong></td>
+        <td>${adj.reason}</td>
+        <td>${badge}</td>
+        <td>${adj.approver}</td>
+        <td>${actions}</td>
+      </tr>
+    `);
+  });
+}
+
+window.approveAdjustment = function (id) {
+  const adj = ttState.adjustments.find(a => a.id === id);
+  if (adj) {
+    adj.status = "Approved";
+    adj.approver = sessionStorage.getItem("wt_user_name") || "Admin";
+    saveTtState();
+    renderAdjustments();
+  }
+};
+window.rejectAdjustment = function (id) {
+  const adj = ttState.adjustments.find(a => a.id === id);
+  if (adj) {
+    adj.status = "Rejected";
+    adj.approver = sessionStorage.getItem("wt_user_name") || "Admin";
+    saveTtState();
+    renderAdjustments();
+  }
+};
+
+
+/* ==========================================================================
+   WORK MANAGEMENT ENGINE (KANBAN / CALENDAR / TABLE)
+   ========================================================================== */
+
+function getWmTasks() {
+  const saved = localStorage.getItem("wt_tasks");
+  if (saved) {
+    try { return JSON.parse(saved); } catch (e) { }
+  }
+  const defaultTasks = [
+    {
+      id: "TASK-101",
+      title: "Build Camera Attendance Verification for Clock In",
+      desc: "Integrate HTML5 MediaDevices camera capture with timestamp watermark verification for employee clock-ins.",
+      assignee: "Prince",
+      status: "done",
+      priority: "Urgent",
+      dueDate: "2026-08-23",
+      tags: ["Attendance", "Camera", "Frontend"],
+      subtasks: [
+        { id: 1, text: "Setup video stream & canvas frame", done: true },
+        { id: 2, text: "Add snapshot capture button", done: true },
+        { id: 3, text: "Save verified photo to attendance log", done: true }
+      ],
+      blockedBy: "",
+      blocks: "TASK-102",
+      attachments: [{ name: "camera-spec.png", size: "240 KB" }],
+      comments: [
+        { id: 1, user: "Prince Patel", avatar: "P", text: "Camera snapshot works seamlessly with fallback support!", time: "10 mins ago" }
+      ]
+    },
+    {
+      id: "TASK-102",
+      title: "Kanban Drag-and-Drop Task Board Layout",
+      desc: "Implement modern Kanban board columns with dragover highlight and state persistence.",
+      assignee: "Ajay",
+      status: "in-progress",
+      priority: "High",
+      dueDate: "2026-08-25",
+      tags: ["UI/UX", "Kanban"],
+      subtasks: [
+        { id: 1, text: "Create drop zones for 4 columns", done: true },
+        { id: 2, text: "Setup HTML5 dragstart & drop handlers", done: true },
+        { id: 3, text: "Sync state to localStorage", done: false }
+      ],
+      blockedBy: "TASK-101",
+      blocks: "",
+      attachments: [],
+      comments: [
+        { id: 1, user: "Ajay", avatar: "A", text: "Tested drag-and-drop on modern browsers.", time: "1 hour ago" }
+      ]
+    },
+    {
+      id: "TASK-103",
+      title: "Weekly Timesheets & Overtime Calculations",
+      desc: "Automatically calculate weekly total hours and flag overtime hours exceeding 8 hours per day.",
+      assignee: "Devyani",
+      status: "in-review",
+      priority: "Medium",
+      dueDate: "2026-08-26",
+      tags: ["Timesheets", "Payroll"],
+      subtasks: [
+        { id: 1, text: "Calculate daily working hours", done: true },
+        { id: 2, text: "Deduct break times", done: true },
+        { id: 3, text: "Calculate overtime delta", done: true }
+      ],
+      blockedBy: "",
+      blocks: "",
+      attachments: [{ name: "overtime-rules.pdf", size: "1.2 MB" }],
+      comments: []
+    },
+    {
+      id: "TASK-104",
+      title: "Interactive Monthly Calendar View",
+      desc: "Display tasks on their respective due dates with month navigation and task detail modals.",
+      assignee: "Jigar",
+      status: "todo",
+      priority: "Medium",
+      dueDate: "2026-08-28",
+      tags: ["Calendar", "Frontend"],
+      subtasks: [
+        { id: 1, text: "Generate month grid cells", done: false },
+        { id: 2, text: "Render task pills per date", done: false }
+      ],
+      blockedBy: "",
+      blocks: "",
+      attachments: [],
+      comments: []
+    },
+    {
+      id: "TASK-105",
+      title: "Subtasks Checklists & Task Dependencies",
+      desc: "Add interactive checklist items with live progress percentage bar and dependency linking.",
+      assignee: "Tanisha",
+      status: "in-progress",
+      priority: "High",
+      dueDate: "2026-08-27",
+      tags: ["Checklist", "Tasks"],
+      subtasks: [
+        { id: 1, text: "Add subtask check toggle", done: true },
+        { id: 2, text: "Calculate percentage progress", done: true },
+        { id: 3, text: "Add task dependencies dropdown", done: true }
+      ],
+      blockedBy: "",
+      blocks: "",
+      attachments: [],
+      comments: []
+    },
+    {
+      id: "TASK-106",
+      title: "Export Company Work Records to Excel & PDF",
+      desc: "Add one-click export for company wide employee logs.",
+      assignee: "Prince",
+      status: "done",
+      priority: "Low",
+      dueDate: "2026-08-22",
+      tags: ["Reporting", "Export"],
+      subtasks: [
+        { id: 1, text: "Configure jsPDF AutoTable", done: true },
+        { id: 2, text: "Configure SheetJS XLSX", done: true }
+      ],
+      blockedBy: "",
+      blocks: "",
+      attachments: [],
+      comments: []
+    }
+  ];
+  localStorage.setItem("wt_tasks", JSON.stringify(defaultTasks));
+  return defaultTasks;
+}
+
+function saveWmTasks() {
+  localStorage.setItem("wt_tasks", JSON.stringify(wmTasks));
+  $("#badge-work-management").text(wmTasks.length + " Tasks");
+  $("#wmTotalTasksBadge").text(wmTasks.length + " Tasks");
+}
+
+function initWorkManagement() {
+  wmTasks = getWmTasks();
+
+  // View tabs
+  $("#wmViewTabs .tab-btn").on("click", function () {
+    const view = $(this).data("wm-view");
+    switchWorkManagementView(view);
+  });
+
+  // Create Task button & modal
+  $("#wmCreateTaskBtn, .kanban-add-quick").on("click", function () {
+    const defaultStatus = $(this).data("status") || "todo";
+    openCreateTaskModal(defaultStatus);
+  });
+
+  $("#closeCreateTaskModal, #cancelCreateTaskBtn, #createTaskModal .modal-overlay").on("click", function () {
+    $("#createTaskModal").hide();
+  });
+
+  $("#createTaskForm").on("submit", function (e) {
+    e.preventDefault();
+    const title = $("#newTaskTitle").val();
+    const desc = $("#newTaskDesc").val();
+    const assignee = $("#newTaskAssignee").val();
+    const status = $("#newTaskStatus").val();
+    const priority = $("#newTaskPriority").val();
+    const dueDate = $("#newTaskDueDate").val();
+    const rawTags = $("#newTaskTags").val();
+    const tags = rawTags ? rawTags.split(",").map(t => $.trim(t)).filter(Boolean) : ["General"];
+
+    const nextId = "TASK-" + (100 + wmTasks.length + 1);
+
+    const newTask = {
+      id: nextId,
+      title: title,
+      desc: desc,
+      assignee: assignee,
+      status: status,
+      priority: priority,
+      dueDate: dueDate,
+      tags: tags,
+      subtasks: [],
+      blockedBy: "",
+      blocks: "",
+      attachments: [],
+      comments: []
+    };
+
+    wmTasks.unshift(newTask);
+    saveWmTasks();
+    $("#createTaskModal").hide();
+    $("#createTaskForm")[0].reset();
+    renderActiveWmView();
+  });
+
+  // Task Detail Modal Events
+  $("#closeTaskDetailModal, #taskDetailModal .modal-overlay").on("click", function () {
+    $("#taskDetailModal").hide();
+    renderActiveWmView();
+  });
+
+  // Add checklist item
+  $("#addSubtaskBtn").on("click", function () {
+    if (!currentActiveTask) return;
+    const txt = $.trim($("#newSubtaskInput").val());
+    if (!txt) return;
+    if (!currentActiveTask.subtasks) currentActiveTask.subtasks = [];
+    currentActiveTask.subtasks.push({
+      id: Date.now(),
+      text: txt,
+      done: false
+    });
+    $("#newSubtaskInput").val("");
+    saveWmTasks();
+    renderTaskModalChecklist();
+  });
+
+  // Add Tag input in Task Detail Modal
+  $("#taskAddTagInput").on("keypress", function (e) {
+    if (e.which === 13) {
+      e.preventDefault();
+      if (!currentActiveTask) return;
+      const tag = $.trim($(this).val());
+      if (tag && !currentActiveTask.tags.includes(tag)) {
+        currentActiveTask.tags.push(tag);
+        $(this).val("");
+        saveWmTasks();
+        renderTaskModalTags();
+      }
+    }
+  });
+
+  // Attachment input
+  $("#taskAttachmentInput").on("change", function () {
+    if (!currentActiveTask || !this.files.length) return;
+    const file = this.files[0];
+    if (!currentActiveTask.attachments) currentActiveTask.attachments = [];
+    const sizeKb = Math.round(file.size / 1024) + " KB";
+    currentActiveTask.attachments.push({
+      name: file.name,
+      size: sizeKb
+    });
+    saveWmTasks();
+    renderTaskModalAttachments();
+  });
+
+  // Post comment
+  $("#postCommentBtn").on("click", function () {
+    if (!currentActiveTask) return;
+    const txt = $.trim($("#newCommentInput").val());
+    if (!txt) return;
+    const currentUser = sessionStorage.getItem("wt_user_name") || "Prince Patel";
+    const initial = currentUser.charAt(0).toUpperCase();
+
+    if (!currentActiveTask.comments) currentActiveTask.comments = [];
+    currentActiveTask.comments.push({
+      id: Date.now(),
+      user: currentUser,
+      avatar: initial,
+      text: txt,
+      time: "Just now"
+    });
+    $("#newCommentInput").val("");
+    saveWmTasks();
+    renderTaskModalComments();
+  });
+
+  // Quick Mention tags
+  $(".mention-tag").on("click", function () {
+    const user = $(this).data("user");
+    const $in = $("#newCommentInput");
+    $in.val($in.val() + " @" + user + " ").focus();
+  });
+
+  // Task Meta Select changes
+  $("#taskDetailStatusSelect").on("change", function () {
+    if (!currentActiveTask) return;
+    currentActiveTask.status = $(this).val();
+    saveWmTasks();
+  });
+  $("#taskDetailPrioritySelect").on("change", function () {
+    if (!currentActiveTask) return;
+    currentActiveTask.priority = $(this).val();
+    $("#taskDetailPriorityTag").text(currentActiveTask.priority).attr("class", "tag " + currentActiveTask.priority.toLowerCase());
+    saveWmTasks();
+  });
+  $("#taskDetailAssigneeSelect").on("change", function () {
+    if (!currentActiveTask) return;
+    currentActiveTask.assignee = $(this).val();
+    saveWmTasks();
+  });
+  $("#taskDetailDueDateInput").on("change", function () {
+    if (!currentActiveTask) return;
+    currentActiveTask.dueDate = $(this).val();
+    saveWmTasks();
+  });
+  $("#taskBlockedBySelect").on("change", function () {
+    if (!currentActiveTask) return;
+    currentActiveTask.blockedBy = $(this).val();
+    saveWmTasks();
+  });
+  $("#taskBlocksSelect").on("change", function () {
+    if (!currentActiveTask) return;
+    currentActiveTask.blocks = $(this).val();
+    saveWmTasks();
+  });
+
+  // Inline Editable Title & Desc
+  $("#taskDetailTitle").on("blur", function () {
+    if (!currentActiveTask) return;
+    currentActiveTask.title = $(this).text();
+    saveWmTasks();
+  });
+  $("#taskDetailDesc").on("blur", function () {
+    if (!currentActiveTask) return;
+    currentActiveTask.desc = $(this).text();
+    saveWmTasks();
+  });
+
+  // Delete Task
+  $("#deleteTaskBtn").on("click", function () {
+    if (!currentActiveTask) return;
+    if (confirm("Are you sure you want to delete this task?")) {
+      wmTasks = wmTasks.filter(t => t.id !== currentActiveTask.id);
+      saveWmTasks();
+      $("#taskDetailModal").hide();
+      renderActiveWmView();
+    }
+  });
+
+  // Calendar navigation
+  $("#calPrevBtn").on("click", function () {
+    currentCalendarMonth--;
+    if (currentCalendarMonth < 0) {
+      currentCalendarMonth = 11;
+      currentCalendarYear--;
+    }
+    renderCalendar();
+  });
+  $("#calNextBtn").on("click", function () {
+    currentCalendarMonth++;
+    if (currentCalendarMonth > 11) {
+      currentCalendarMonth = 0;
+      currentCalendarYear++;
+    }
+    renderCalendar();
+  });
+  $("#calTodayBtn").on("click", function () {
+    currentCalendarMonth = new Date().getMonth();
+    currentCalendarYear = new Date().getFullYear();
+    renderCalendar();
+  });
+
+  // Table filters
+  $("#wmSearchInput, #wmStatusFilter, #wmPriorityFilter").on("input change", function () {
+    renderTaskTable();
+  });
+
+  // Back button in Work Management
+  $("#wmBackBtn").on("click", function () {
+    $("#workManagementSection").hide();
+    welcomeSection.style.display = "block";
+    bcMember.textContent = "Overview";
+    document.querySelectorAll(".nav-btn").forEach(b => { b.classList.remove("active"); b.setAttribute("aria-expanded", "false"); });
+    document.querySelectorAll(".nav-submenu").forEach(s => s.classList.remove("open"));
+    document.querySelectorAll(".sub-link").forEach(l => l.classList.remove("active"));
+  });
+
+  // Initialize Kanban
+  setupKanbanDragDrop();
+  renderKanban();
+}
+
+function switchWorkManagementView(view) {
+  $("#wmViewTabs .tab-btn").removeClass("active");
+  $(`#wmViewTabs .tab-btn[data-wm-view="${view}"]`).addClass("active");
+
+  $("#wmPanelKanban, #wmPanelCalendar, #wmPanelTable").hide();
+
+  if (view === "kanban") {
+    $("#wmPanelKanban").fadeIn(200);
+    renderKanban();
+  } else if (view === "calendar") {
+    $("#wmPanelCalendar").fadeIn(200);
+    renderCalendar();
+  } else if (view === "table") {
+    $("#wmPanelTable").fadeIn(200);
+    renderTaskTable();
+  }
+}
+
+function renderActiveWmView() {
+  const activeView = $("#wmViewTabs .tab-btn.active").data("wm-view") || "kanban";
+  if (activeView === "kanban") renderKanban();
+  else if (activeView === "calendar") renderCalendar();
+  else if (activeView === "table") renderTaskTable();
+}
+
+// Kanban Render & Drag-and-Drop
+function renderKanban() {
+  const columns = {
+    "todo": $("#zoneTodo"),
+    "in-progress": $("#zoneInProgress"),
+    "in-review": $("#zoneInReview"),
+    "done": $("#zoneDone")
+  };
+
+  const counts = { "todo": 0, "in-progress": 0, "in-review": 0, "done": 0 };
+  Object.values(columns).forEach($col => $col.empty());
+
+  wmTasks.forEach(t => {
+    const colStatus = t.status || "todo";
+    if (columns[colStatus]) {
+      counts[colStatus]++;
+      const card = createKanbanCardElement(t);
+      columns[colStatus].append(card);
+    }
+  });
+
+  $("#countTodo").text(counts["todo"]);
+  $("#countInProgress").text(counts["in-progress"]);
+  $("#countInReview").text(counts["in-review"]);
+  $("#countDone").text(counts["done"]);
+}
+
+function createKanbanCardElement(t) {
+  const priorityClass = (t.priority || "Medium").toLowerCase();
+  const subtasksTotal = (t.subtasks || []).length;
+  const subtasksDone = (t.subtasks || []).filter(s => s.done).length;
+  const subtasksPct = subtasksTotal ? Math.round((subtasksDone / subtasksTotal) * 100) : 0;
+
+  const progressHtml = subtasksTotal > 0 ? `
+    <div class="kanban-card-progress">
+      <div class="kanban-progress-meta">
+        <span>Checklist</span>
+        <span>${subtasksDone}/${subtasksTotal} (${subtasksPct}%)</span>
+      </div>
+      <div class="progress-bar" style="height:4px;">
+        <div class="progress-fill" style="width:${subtasksPct}%;"></div>
+      </div>
+    </div>
+  ` : '';
+
+  const tagsHtml = (t.tags || []).map(tag => `<span class="kanban-tag-chip">${tag}</span>`).join("");
+  const attachCount = (t.attachments || []).length;
+  const commentCount = (t.comments || []).length;
+  const assigneeInitial = (t.assignee || "P").charAt(0).toUpperCase();
+
+  const $card = $(`
+    <div class="kanban-card" draggable="true" data-id="${t.id}">
+      <div class="kanban-card-top">
+        <span class="priority-tag ${priorityClass}">${t.priority || "Medium"}</span>
+        <span class="task-id-badge">${t.id}</span>
+      </div>
+      <div class="kanban-card-title">${t.title}</div>
+      <div class="kanban-card-desc">${t.desc || ""}</div>
+      <div class="kanban-card-tags">${tagsHtml}</div>
+      ${progressHtml}
+      <div class="kanban-card-footer">
+        <div class="kanban-card-meta">
+          ${attachCount ? `<span><span class="material-icons" style="font-size:14px;">attach_file</span> ${attachCount}</span>` : ''}
+          ${commentCount ? `<span><span class="material-icons" style="font-size:14px;">chat_bubble_outline</span> ${commentCount}</span>` : ''}
+          <span><span class="material-icons" style="font-size:14px;">event</span> ${t.dueDate || "No date"}</span>
+        </div>
+        <div class="kanban-card-avatar" title="${t.assignee}">${assigneeInitial}</div>
+      </div>
+    </div>
+  `);
+
+  $card.on("click", function () {
+    openTaskDetailModal(t.id);
+  });
+
+  return $card;
+}
+
+function setupKanbanDragDrop() {
+  $(document).on("dragstart", ".kanban-card", function (e) {
+    $(this).addClass("dragging");
+    e.originalEvent.dataTransfer.setData("text/plain", $(this).data("id"));
+  });
+
+  $(document).on("dragend", ".kanban-card", function () {
+    $(this).removeClass("dragging");
+    $(".kanban-drop-zone").removeClass("drag-over");
+  });
+
+  $(".kanban-drop-zone").on("dragover", function (e) {
+    e.preventDefault();
+    $(this).addClass("drag-over");
+  });
+
+  $(".kanban-drop-zone").on("dragleave", function () {
+    $(this).removeClass("drag-over");
+  });
+
+  $(".kanban-drop-zone").on("drop", function (e) {
+    e.preventDefault();
+    $(this).removeClass("drag-over");
+    const taskId = e.originalEvent.dataTransfer.getData("text/plain");
+    const targetStatus = $(this).closest(".kanban-col").data("status");
+
+    const task = wmTasks.find(t => t.id === taskId);
+    if (task && targetStatus) {
+      task.status = targetStatus;
+      saveWmTasks();
+      renderKanban();
+    }
+  });
+}
+
+// Calendar View Render
+function renderCalendar() {
+  const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  $("#calMonthTitle").text(`${monthNames[currentCalendarMonth]} ${currentCalendarYear}`);
+
+  const $grid = $("#calendarDaysGrid");
+  $grid.empty();
+
+  const firstDayIndex = new Date(currentCalendarYear, currentCalendarMonth, 1).getDay();
+  const daysInMonth = new Date(currentCalendarYear, currentCalendarMonth + 1, 0).getDate();
+  const prevDaysInMonth = new Date(currentCalendarYear, currentCalendarMonth, 0).getDate();
+
+  const today = new Date();
+  const isCurrentMonth = today.getMonth() === currentCalendarMonth && today.getFullYear() === currentCalendarYear;
+
+  // Previous month padding days
+  for (let x = firstDayIndex; x > 0; x--) {
+    const dayNum = prevDaysInMonth - x + 1;
+    $grid.append(`<div class="cal-day-cell other-month"><div class="cal-day-num">${dayNum}</div></div>`);
+  }
+
+  // Current month days
+  for (let i = 1; i <= daysInMonth; i++) {
+    const isToday = isCurrentMonth && today.getDate() === i;
+    const dateStr = `${currentCalendarYear}-${String(currentCalendarMonth + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+
+    const matchingTasks = wmTasks.filter(t => t.dueDate === dateStr);
+
+    let pillsHtml = "";
+    matchingTasks.forEach(t => {
+      let bg = "#7c3aed";
+      if (t.priority === "Urgent") bg = "#ef4444";
+      if (t.priority === "High") bg = "#f97316";
+      if (t.priority === "Low") bg = "#10b981";
+      pillsHtml += `<div class="cal-task-pill" style="background:${bg}" title="${t.title}" onclick="event.stopPropagation(); openTaskDetailModal('${t.id}')">${t.title}</div>`;
+    });
+
+    const $cell = $(`
+      <div class="cal-day-cell ${isToday ? 'today' : ''}" data-date="${dateStr}">
+        <div class="cal-day-num">${i} ${isToday ? '●' : ''}</div>
+        <div class="cal-tasks-wrap">${pillsHtml}</div>
+      </div>
+    `);
+
+    $cell.on("click", function () {
+      openCreateTaskModal("todo", dateStr);
+    });
+
+    $grid.append($cell);
+  }
+
+  // Trailing days for grid balance
+  const totalCells = firstDayIndex + daysInMonth;
+  const trailingDays = 42 - totalCells;
+  if (trailingDays > 0 && trailingDays < 7) {
+    for (let j = 1; j <= trailingDays; j++) {
+      $grid.append(`<div class="cal-day-cell other-month"><div class="cal-day-num">${j}</div></div>`);
+    }
+  }
+}
+
+// Table / List View Render
+function renderTaskTable() {
+  const search = $.trim($("#wmSearchInput").val()).toLowerCase();
+  const statusFilter = $("#wmStatusFilter").val();
+  const priorityFilter = $("#wmPriorityFilter").val();
+
+  const filtered = wmTasks.filter(t => {
+    if (statusFilter !== "all" && t.status !== statusFilter) return false;
+    if (priorityFilter !== "all" && t.priority !== priorityFilter) return false;
+    if (search) {
+      const matchTitle = (t.title || "").toLowerCase().includes(search);
+      const matchAssignee = (t.assignee || "").toLowerCase().includes(search);
+      const matchTags = (t.tags || []).some(tag => tag.toLowerCase().includes(search));
+      if (!matchTitle && !matchAssignee && !matchTags) return false;
+    }
+    return true;
+  });
+
+  const $tb = $("#wmTasksTableBody");
+  $tb.empty();
+
+  if (!filtered.length) {
+    $tb.append('<tr><td colspan="8" style="text-align:center; color:#a099af; padding:20px;">No tasks match your filters.</td></tr>');
+    return;
+  }
+
+  filtered.forEach(t => {
+    const priorityClass = (t.priority || "Medium").toLowerCase();
+    const subtasksTotal = (t.subtasks || []).length;
+    const subtasksDone = (t.subtasks || []).filter(s => s.done).length;
+    const subtasksPct = subtasksTotal ? Math.round((subtasksDone / subtasksTotal) * 100) : 0;
+
+    let statusBadge = '<span class="status-badge status-pending">To Do</span>';
+    if (t.status === "in-progress") statusBadge = '<span class="status-badge status-progress">In Progress</span>';
+    if (t.status === "in-review") statusBadge = '<span class="status-badge status-progress" style="background:#fef3c7; color:#d97706;">In Review</span>';
+    if (t.status === "done") statusBadge = '<span class="status-badge status-completed">Completed</span>';
+
+    $tb.append(`
+      <tr>
+        <td><strong>${t.id}</strong></td>
+        <td><strong>${t.title}</strong></td>
+        <td>${t.assignee || "Unassigned"}</td>
+        <td><span class="priority-tag ${priorityClass}">${t.priority}</span></td>
+        <td>${statusBadge}</td>
+        <td>${subtasksTotal ? `${subtasksDone}/${subtasksTotal} (${subtasksPct}%)` : 'No subtasks'}</td>
+        <td>${t.dueDate || "—"}</td>
+        <td>
+          <button class="action-btn edit-btn" onclick="openTaskDetailModal('${t.id}')" title="Edit Task">
+            <span class="material-icons" style="font-size:16px;">edit</span>
+          </button>
+        </td>
+      </tr>
+    `);
+  });
+}
+
+function openCreateTaskModal(status, dateStr) {
+  const $assignee = $("#newTaskAssignee");
+  $assignee.empty();
+  Object.values(members).forEach(m => {
+    $assignee.append(`<option value="${m.name}">${m.name}</option>`);
+  });
+
+  $("#newTaskStatus").val(status || "todo");
+  $("#newTaskDueDate").val(dateStr || new Date().toISOString().split('T')[0]);
+  $("#createTaskModal").show();
+  $("#newTaskTitle").focus();
+}
+
+window.openTaskDetailModal = function (taskId) {
+  const task = wmTasks.find(t => t.id === taskId);
+  if (!task) return;
+  currentActiveTask = task;
+
+  $("#taskDetailId").text(task.id);
+  $("#taskDetailPriorityTag").text(task.priority || "Medium").attr("class", "tag " + (task.priority || "Medium").toLowerCase());
+  $("#taskDetailTitle").text(task.title);
+  $("#taskDetailDesc").text(task.desc || "");
+
+  $("#taskDetailStatusSelect").val(task.status || "todo");
+  $("#taskDetailPrioritySelect").val(task.priority || "Medium");
+
+  // Populate assignees
+  const $assignee = $("#taskDetailAssigneeSelect");
+  $assignee.empty();
+  Object.values(members).forEach(m => {
+    $assignee.append(`<option value="${m.name}">${m.name}</option>`);
+  });
+  $assignee.val(task.assignee || "Prince");
+  $("#taskDetailDueDateInput").val(task.dueDate || "");
+
+  // Dependencies selects
+  const $blockedBy = $("#taskBlockedBySelect");
+  const $blocks = $("#taskBlocksSelect");
+  $blockedBy.empty().append('<option value="">None</option>');
+  $blocks.empty().append('<option value="">None</option>');
+
+  wmTasks.forEach(t => {
+    if (t.id !== task.id) {
+      $blockedBy.append(`<option value="${t.id}">${t.id} - ${t.title}</option>`);
+      $blocks.append(`<option value="${t.id}">${t.id} - ${t.title}</option>`);
+    }
+  });
+  $blockedBy.val(task.blockedBy || "");
+  $blocks.val(task.blocks || "");
+
+  renderTaskModalChecklist();
+  renderTaskModalTags();
+  renderTaskModalAttachments();
+  renderTaskModalComments();
+
+  $("#taskDetailModal").show();
+};
+
+function renderTaskModalChecklist() {
+  if (!currentActiveTask) return;
+  const $wrap = $("#taskChecklistItems");
+  $wrap.empty();
+
+  const subtasks = currentActiveTask.subtasks || [];
+  const total = subtasks.length;
+  const doneCount = subtasks.filter(s => s.done).length;
+  const pct = total ? Math.round((doneCount / total) * 100) : 0;
+
+  $("#taskChecklistPct").text(pct + "%");
+  $("#taskChecklistProgressBar").css("width", pct + "%");
+
+  subtasks.forEach(s => {
+    const $item = $(`
+      <div class="checklist-item ${s.done ? 'done' : ''}">
+        <input type="checkbox" ${s.done ? 'checked' : ''} />
+        <span>${s.text}</span>
+        <button type="button" class="btn-delete-check">&times;</button>
+      </div>
+    `);
+
+    $item.find('input[type="checkbox"]').on("change", function () {
+      s.done = $(this).is(":checked");
+      saveWmTasks();
+      renderTaskModalChecklist();
+    });
+
+    $item.find('.btn-delete-check').on("click", function () {
+      currentActiveTask.subtasks = currentActiveTask.subtasks.filter(item => item.id !== s.id);
+      saveWmTasks();
+      renderTaskModalChecklist();
+    });
+
+    $wrap.append($item);
+  });
+}
+
+function renderTaskModalTags() {
+  if (!currentActiveTask) return;
+  const $wrap = $("#taskDetailTagsWrap");
+  $wrap.empty();
+
+  (currentActiveTask.tags || []).forEach(tag => {
+    const $chip = $(`<span class="tag" style="cursor:pointer;" title="Click to remove">${tag} &times;</span>`);
+    $chip.on("click", function () {
+      currentActiveTask.tags = currentActiveTask.tags.filter(t => t !== tag);
+      saveWmTasks();
+      renderTaskModalTags();
+    });
+    $wrap.append($chip);
+  });
+}
+
+function renderTaskModalAttachments() {
+  if (!currentActiveTask) return;
+  const $wrap = $("#taskAttachmentsList");
+  $wrap.empty();
+
+  const atts = currentActiveTask.attachments || [];
+  if (!atts.length) {
+    $wrap.html('<span style="font-size:0.75rem; color:#a099af;">No files attached yet.</span>');
+    return;
+  }
+
+  atts.forEach(a => {
+    $wrap.append(`
+      <div class="attachment-card">
+        <span class="material-icons">description</span>
+        <span>${a.name} (${a.size})</span>
+      </div>
+    `);
+  });
+}
+
+function renderTaskModalComments() {
+  if (!currentActiveTask) return;
+  const $stream = $("#taskCommentsStream");
+  $stream.empty();
+
+  const comments = currentActiveTask.comments || [];
+  if (!comments.length) {
+    $stream.html('<span style="font-size:0.75rem; color:#a099af;">No comments yet. Be the first to comment!</span>');
+    return;
+  }
+
+  comments.forEach(c => {
+    $stream.append(`
+      <div class="comment-bubble">
+        <div class="comment-avatar">${c.avatar || c.user.charAt(0)}</div>
+        <div class="comment-content">
+          <div class="comment-meta">
+            <strong>${c.user}</strong>
+            <span>${c.time}</span>
+          </div>
+          <div class="comment-text">${c.text}</div>
+        </div>
+      </div>
+    `);
+  });
+}
+
+function showTimeTracking(subTab) {
+  currentMember = null;
+  currentTab = "time-tracking";
+  const tabToOpen = subTab || "clock-in";
+
+  welcomeSection.style.display = "none";
+  memberDetail.style.display = "none";
+  document.getElementById("companyRecordsSection").style.display = "none";
+  const wmSec = document.getElementById("workManagementSection"); if (wmSec) wmSec.style.display = "none";
+
+  const ttSection = document.getElementById("timeTrackingSection");
+  if (ttSection) {
+    ttSection.style.display = "block";
+    ttSection.style.animation = "none";
+    requestAnimationFrame(() => { ttSection.style.animation = "fadeIn 0.4s ease"; });
+  }
+
+  bcMember.textContent = "Time Tracking";
+
+  // Collapse other submenus
+  document.querySelectorAll(".nav-btn").forEach(b => {
+    b.setAttribute("aria-expanded", "false");
+    b.classList.remove("active");
+  });
+  document.querySelectorAll(".nav-submenu").forEach(s => s.classList.remove("open"));
+
+  const ttBtn = document.getElementById("timeTrackingBtn");
+  if (ttBtn) {
+    ttBtn.classList.add("active");
+  }
+
+  switchTimeTrackingTab(tabToOpen);
+}
+
+function showWorkManagement(subView) {
+  currentMember = null;
+  currentTab = "work-management";
+  const viewToOpen = subView || "kanban";
+
+  welcomeSection.style.display = "none";
+  memberDetail.style.display = "none";
+  document.getElementById("companyRecordsSection").style.display = "none";
+  const ttSec = document.getElementById("timeTrackingSection"); if (ttSec) ttSec.style.display = "none";
+
+  const wmSection = document.getElementById("workManagementSection");
+  if (wmSection) {
+    wmSection.style.display = "block";
+    wmSection.style.animation = "none";
+    requestAnimationFrame(() => { wmSection.style.animation = "fadeIn 0.4s ease"; });
+  }
+
+  bcMember.textContent = "Work Management";
+
+  // Collapse other submenus
+  document.querySelectorAll(".nav-btn").forEach(b => {
+    b.setAttribute("aria-expanded", "false");
+    b.classList.remove("active");
+  });
+  document.querySelectorAll(".nav-submenu").forEach(s => s.classList.remove("open"));
+
+  const wmBtn = document.getElementById("workManagementBtn");
+  if (wmBtn) {
+    wmBtn.setAttribute("aria-expanded", "true");
+    wmBtn.classList.add("active");
+  }
+  const wmSub = document.getElementById("sub-work-management");
+  if (wmSub) wmSub.classList.add("open");
+
+  // Highlight sub-link
+  document.querySelectorAll(".sub-link").forEach(l => l.classList.remove("active"));
+  const activeSubLink = document.querySelector(`.sub-link[data-section="work-management"][data-sub="${viewToOpen}"]`);
+  if (activeSubLink) activeSubLink.classList.add("active");
+
+  switchWorkManagementView(viewToOpen);
+}
+
+// ===== START APPLICATION =====
+init();
+
+
